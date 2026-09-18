@@ -1,0 +1,198 @@
+[
+  {
+    "name": "ASCORIL-D",
+    "code": "ASCORIL-D",
+    "unit": null,
+    "price": 76.55,
+    "category": "DERMA"
+  },
+  {
+    "name": "CANDID CREAM 20 GM",
+    "code": "CANDID-CREAM-20-GM",
+    "unit": "20GM",
+    "price": 73.49,
+    "category": "DERMA"
+  },
+  {
+    "name": "CANDID LOTION 30ML",
+    "code": "CANDID-LOTION-30ML",
+    "unit": "30ML",
+    "price": 95.27,
+    "category": "DERMA"
+  },
+  {
+    "name": "CANDID POWDER 100GM",
+    "code": "CANDID-POWDER-100GM",
+    "unit": "100GM",
+    "price": 91.13,
+    "category": "DERMA"
+  },
+  {
+    "name": "CANDID POWDER 50 GM",
+    "code": "CANDID-POWDER-50-GM",
+    "unit": "50GM",
+    "price": 58.32,
+    "category": "DERMA"
+  },
+  {
+    "name": "LULICAN CREAM 30 GM",
+    "code": "LULICAN-CREAM-30-GM",
+    "unit": "30GM",
+    "price": 273.38,
+    "category": "DERMA"
+  },
+  {
+    "name": "LULICAN CREAM 20 GM",
+    "code": "LULICAN-CREAM-20-GM",
+    "unit": "20GM",
+    "price": 123.93,
+    "category": "DERMA"
+  },
+  {
+    "name": "LULICAN LOTION 30 ML",
+    "code": "LULICAN-LOTION-30-ML",
+    "unit": "30ML",
+    "price": 171.25,
+    "category": "DERMA"
+  },
+  {
+    "name": "SUPIROCIN OINT  5 GM",
+    "code": "SUPIROCIN-OINT-5-GM",
+    "unit": "5GM",
+    "price": 82.74,
+    "category": "DERMA"
+  },
+  {
+    "name": "SUPIROCIN -B- OINT 5 GMS",
+    "code": "SUPIROCIN-B-OINT-5-GMS",
+    "unit": "5GMS",
+    "price": 135.6,
+    "category": "DERMA"
+  },
+  {
+    "name": "MOMATE CREAM 20GM",
+    "code": "MOMATE-CREAM-20GM",
+    "unit": "20GM",
+    "price": 217.25,
+    "category": "DERMA"
+  },
+  {
+    "name": "MOMATE OINTMENT 15 GM",
+    "code": "MOMATE-OINTMENT-15-GM",
+    "unit": "15GM",
+    "price": 206.31,
+    "category": "DERMA"
+  },
+  {
+    "name": "MOMATE-F",
+    "code": "MOMATE-F",
+    "unit": null,
+    "price": 227.45,
+    "category": "DERMA"
+  },
+  {
+    "name": "DERIVA MS GEL 15 GM",
+    "code": "DERIVA-MS-GEL-15-GM",
+    "unit": "15GM",
+    "price": 251.51,
+    "category": "DERMA"
+  },
+  {
+    "name": "D ACNE GEL",
+    "code": "D-ACNE-GEL",
+    "unit": null,
+    "price": 117.74,
+    "category": "DERMA"
+  },
+  {
+    "name": "GLENMARK BILAZAP TABLET 10'S",
+    "code": "GLENMARK-BILAZAP-TABLET-10-S",
+    "unit": "10'S",
+    "price": 118.83,
+    "category": "DERMA"
+  },
+  {
+    "name": "HAIR FOR U 2%",
+    "code": "HAIR-FOR-U-2",
+    "unit": null,
+    "price": 188.66,
+    "category": "HAIR CARE"
+  },
+  {
+    "name": "HAIR FOR U 5%",
+    "code": "HAIR-FOR-U-5",
+    "unit": null,
+    "price": 421.88,
+    "category": "HAIR CARE"
+  },
+  {
+    "name": "HAIR 4 U 10%",
+    "code": "HAIR-4-U-10",
+    "unit": null,
+    "price": 447.4,
+    "category": "HAIR CARE"
+  },
+  {
+    "name": "SCALPE LOTION 60ML",
+    "code": "SCALPE-LOTION-60ML",
+    "unit": "60ML",
+    "price": 167.14,
+    "category": "HAIR CARE"
+  },
+  {
+    "name": "ELOVERA CREAM 150 GM",
+    "code": "ELOVERA-CREAM-150-GM",
+    "unit": "150GM",
+    "price": 191.97,
+    "category": "SKIN CARE"
+  },
+  {
+    "name": "ELOVERA CREAM 75 GM",
+    "code": "ELOVERA-CREAM-75-GM",
+    "unit": "75GM",
+    "price": 125.78,
+    "category": "SKIN CARE"
+  },
+  {
+    "name": "ELOVERA PRO MAX CREAM",
+    "code": "ELOVERA-PRO-MAX-CREAM",
+    "unit": null,
+    "price": 157.62,
+    "category": "SKIN CARE"
+  },
+  {
+    "name": "ELOVERA PRO MAX LOTION",
+    "code": "ELOVERA-PRO-MAX-LOTION",
+    "unit": null,
+    "price": 191.29,
+    "category": "SKIN CARE"
+  },
+  {
+    "name": "LA SHIELD GEL 60ML",
+    "code": "LA-SHIELD-GEL-60ML",
+    "unit": "60ML",
+    "price": 424.5,
+    "category": "SKIN CARE"
+  },
+  {
+    "name": "LA SHIELD LITE",
+    "code": "LA-SHIELD-LITE",
+    "unit": null,
+    "price": 513.59,
+    "category": "SKIN CARE"
+  },
+  {
+    "name": "D ACNE FACE WASH",
+    "code": "D-ACNE-FACE-WASH",
+    "unit": null,
+    "price": 272.75,
+    "category": "SKIN CARE"
+  },
+  {
+    "name": "D ACNE SOFT",
+    "code": "D-ACNE-SOFT",
+    "unit": null,
+    "price": 214.35,
+    "category": "SKIN CARE"
+  }
+]

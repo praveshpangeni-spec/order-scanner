@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "Order Scanner",
+    "slug": "order-scanner",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "splash": { "backgroundColor": "#0f766e" },
+    "ios": { "supportsTablet": true, "infoPlist": { "NSCameraUsageDescription": "Take photos of orders to scan them." } },
+    "android": { "package": "com.orderscanner.app" },
+    "plugins": ["expo-image-picker"]
+  }
+}

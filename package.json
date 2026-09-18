@@ -1,0 +1,10 @@
+{
+  "name": "order-ocr-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Read order images with on-device OCR, match against a product list, confirm, store, and export to Excel. Web (Next.js) + mobile (Expo), shared core.",
+  "workspaces": [
+    "shared",
+    "web"
+  ]
+}
