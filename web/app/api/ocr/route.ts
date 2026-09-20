@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
-export const maxDuration = 45;
+export const maxDuration = 60;
 
 /**
  * Structured order extraction via the Gemini API (Google AI Studio) — free tier,
@@ -116,8 +116,9 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  // The free tier sometimes returns 429/503 "overloaded" — retry with backoff.
-  const MAX_TRIES = 4;
+  // The free tier sometimes returns 429/503 "overloaded" — retry with
+  // exponential backoff so real scans ride through transient spikes.
+  const MAX_TRIES = 6;
   let lastErr = "OCR request failed.";
   for (let attempt = 0; attempt < MAX_TRIES; attempt++) {
     try {
@@ -144,7 +145,8 @@ export async function POST(req: NextRequest) {
     } catch (e: any) {
       lastErr = e?.message || lastErr;
     }
-    if (attempt < MAX_TRIES - 1) await sleep(700 * (attempt + 1) + Math.random() * 300);
+    if (attempt < MAX_TRIES - 1)
+      await sleep(Math.min(6000, 700 * 2 ** attempt) + Math.random() * 400);
   }
   return NextResponse.json(
     { error: `The OCR model is busy right now. Please try again. (${lastErr})` },
