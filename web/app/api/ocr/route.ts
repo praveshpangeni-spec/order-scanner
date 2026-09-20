@@ -1,7 +1,49 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
+
+// ---- Daily free-tier scan counter (shared across all users via Supabase) ----
+const SB_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SB_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const sb = SB_URL && SB_KEY ? createClient(SB_URL, SB_KEY) : null;
+const DAILY_LIMIT = Number(process.env.NEXT_PUBLIC_SCAN_DAILY_LIMIT || "20");
+
+/** Google resets free-tier daily quota at midnight Pacific Time. */
+function ptDay(): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Los_Angeles",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+function nextResetISO(): string {
+  const now = new Date();
+  const pt = new Date(now.toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
+  const mid = new Date(pt);
+  mid.setHours(24, 0, 0, 0);
+  return new Date(now.getTime() + (mid.getTime() - pt.getTime())).toISOString();
+}
+async function readUsage() {
+  let used = 0;
+  if (sb) {
+    const { data } = await sb.from("scan_usage").select("count").eq("day", ptDay()).maybeSingle();
+    used = data?.count || 0;
+  }
+  return { used, limit: DAILY_LIMIT, remaining: Math.max(0, DAILY_LIMIT - used), resetsAt: nextResetISO() };
+}
+async function bumpUsage() {
+  if (!sb) return;
+  const day = ptDay();
+  const { data } = await sb.from("scan_usage").select("count").eq("day", day).maybeSingle();
+  await sb.from("scan_usage").upsert({ day, count: (data?.count || 0) + 1 });
+}
+
+export async function GET() {
+  return NextResponse.json(await readUsage(), { headers: cors() });
+}
 
 /**
  * Structured order extraction via the Gemini API (Google AI Studio) — free tier,
@@ -143,7 +185,9 @@ export async function POST(req: NextRequest) {
           const text: string =
             data?.candidates?.[0]?.content?.parts?.map((p: any) => p.text || "").join("") || "";
           const parsed = parseResult(text);
-          return NextResponse.json({ ...parsed, raw: text }, { headers: cors() });
+          await bumpUsage();
+          const usage = await readUsage();
+          return NextResponse.json({ ...parsed, usage, raw: text }, { headers: cors() });
         }
         const msg: string = data?.error?.message || `Gemini error ${resp.status}`;
         lastErr = msg;
@@ -164,9 +208,13 @@ export async function POST(req: NextRequest) {
   }
 
   const hint = quotaHit
-    ? "All OCR models are over their free-tier limit right now. Wait about a minute and try again, or enable Gemini API billing for higher limits."
+    ? "Daily free-tier scan limit reached. It resets at the time shown, or enable Gemini API billing for higher limits."
     : "The OCR service is busy. Please try again.";
-  return NextResponse.json({ error: `${hint} (${lastErr})` }, { status: 503, headers: cors() });
+  const usage = await readUsage();
+  return NextResponse.json(
+    { error: `${hint} (${lastErr})`, usage: quotaHit ? { ...usage, remaining: 0 } : usage },
+    { status: 503, headers: cors() }
+  );
 }
 
 function sleep(ms: number): Promise<void> {

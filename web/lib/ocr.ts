@@ -1,9 +1,28 @@
 "use client";
 import type { ExtractedItem, ExtractedHeader } from "@order/shared";
 
+export interface ScanUsage {
+  used: number;
+  limit: number;
+  remaining: number;
+  resetsAt: string;
+}
+
 export interface ExtractResult {
   header: ExtractedHeader;
   items: ExtractedItem[];
+  usage?: ScanUsage;
+}
+
+/** Current shared daily scan usage (free-tier counter). */
+export async function getUsage(): Promise<ScanUsage | null> {
+  try {
+    const res = await fetch("/api/ocr", { method: "GET" });
+    if (!res.ok) return null;
+    return (await res.json()) as ScanUsage;
+  } catch {
+    return null;
+  }
 }
 
 export type OcrProgress = (info: { status: string; progress: number }) => void;
@@ -54,9 +73,17 @@ export async function extractImage(
     body: JSON.stringify({ image: dataUrl, products: productNames }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data?.error || `OCR failed (${res.status})`);
+  if (!res.ok) {
+    const err: any = new Error(data?.error || `OCR failed (${res.status})`);
+    err.usage = data?.usage;
+    throw err;
+  }
   onProgress?.({ status: "done", progress: 1 });
-  return { header: (data.header as ExtractedHeader) || {}, items: (data.items as ExtractedItem[]) || [] };
+  return {
+    header: (data.header as ExtractedHeader) || {},
+    items: (data.items as ExtractedItem[]) || [],
+    usage: data.usage as ScanUsage | undefined,
+  };
 }
 
 /** Extract from several images; concatenates items, keeps the first header found. */
@@ -67,10 +94,12 @@ export async function extractImages(
 ): Promise<ExtractResult> {
   const all: ExtractedItem[] = [];
   let header: ExtractedHeader = {};
+  let usage: ScanUsage | undefined;
   for (let i = 0; i < files.length; i++) {
     const r = await extractImage(files[i], productNames, (info) => onProgress?.(i, info));
     all.push(...r.items);
     if (!header.customer && !header.location) header = r.header;
+    if (r.usage) usage = r.usage;
   }
-  return { header, items: all };
+  return { header, items: all, usage };
 }

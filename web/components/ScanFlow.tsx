@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { Product, DraftItem, MatchConfidence, Month } from "@order/shared";
 import { draftFromItems, priceFor } from "@order/shared";
-import { extractImages } from "@/lib/ocr";
+import { extractImages, getUsage, type ScanUsage } from "@/lib/ocr";
 import {
   getProducts,
   createOrder,
@@ -50,6 +50,7 @@ export default function ScanFlow() {
   const [progress, setProgress] = useState<{ i: number; pct: number } | null>(null);
   const [savedCount, setSavedCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [usage, setUsage] = useState<ScanUsage | null>(null);
 
   const [months, setMonths] = useState<Month[]>([]);
   const [month, setMonth] = useState<string>("");
@@ -61,6 +62,7 @@ export default function ScanFlow() {
 
   useEffect(() => {
     getProducts().then(setProducts).catch((e) => setError(String(e)));
+    getUsage().then(setUsage).catch(() => {});
     listMonths()
       .then((ms) => {
         setMonths(ms);
@@ -109,11 +111,12 @@ export default function ScanFlow() {
     setPhase("ocr");
     setProgress({ i: 0, pct: 0 });
     try {
-      const { header, items } = await extractImages(
+      const { header, items, usage: u } = await extractImages(
         files,
         products.map((p) => p.name),
         (i, info) => setProgress({ i, pct: Math.round(info.progress * 100) })
       );
+      if (u) setUsage(u);
       let loc = location;
       if (header.location) {
         const m = LOCATIONS.find(
@@ -134,6 +137,7 @@ export default function ScanFlow() {
       setRows(draft.map((d) => ({ ...d, include: d.product != null && d.confidence !== "none" })));
       setPhase("review");
     } catch (e: any) {
+      if (e?.usage) setUsage(e.usage);
       setError(e?.message || String(e));
       setPhase("input");
     }
@@ -208,6 +212,32 @@ export default function ScanFlow() {
         <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
       )}
 
+      {usage && (
+        <div
+          className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border px-3 py-2 text-xs ${
+            usage.remaining <= 0
+              ? "border-red-200 bg-red-50 text-red-700"
+              : usage.remaining <= 5
+              ? "border-amber-200 bg-amber-50 text-amber-800"
+              : "border-slate-200 bg-white text-slate-600"
+          }`}
+        >
+          <span>
+            Free scans today: <strong>{usage.used}/{usage.limit}</strong>
+            {usage.remaining > 0 ? ` · ${usage.remaining} left` : " · limit reached"}
+          </span>
+          <span>
+            Resets{" "}
+            {new Date(usage.resetsAt).toLocaleString(undefined, {
+              month: "short",
+              day: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
+            })}
+          </span>
+        </div>
+      )}
+
       {/* Month bar — always visible */}
       <div className="card flex flex-wrap items-end gap-3 p-4">
         <label className="text-sm">
@@ -275,8 +305,14 @@ export default function ScanFlow() {
               </button>
             </div>
             {phase === "input" && (
-              <button className="btn-primary mt-4" disabled={files.length === 0 || !month} onClick={runScan}>
-                Scan {files.length > 0 ? `${files.length} image${files.length > 1 ? "s" : ""}` : ""}
+              <button
+                className="btn-primary mt-4"
+                disabled={files.length === 0 || !month || (usage != null && usage.remaining <= 0)}
+                onClick={runScan}
+              >
+                {usage != null && usage.remaining <= 0
+                  ? "Daily limit reached"
+                  : `Scan ${files.length > 0 ? `${files.length} image${files.length > 1 ? "s" : ""}` : ""}`}
               </button>
             )}
           </div>
