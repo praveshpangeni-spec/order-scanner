@@ -92,11 +92,19 @@ export function exportMatrixXlsx(
     const lastDataRow = 2 + N;
     const totalRowNum = 3 + N;
     const mpRange = `$B${firstDataRow}:$B${lastDataRow}`;
-    parties.forEach((_, k) => {
+    parties.forEach((p, k) => {
       const salesCol = colLetter(2 + k * 2); // C, E, G, ...
       const cellRef = `${salesCol}${totalRowNum}`;
+      // Cache the computed value so the cell survives the write and shows a
+      // number before Excel recalculates the formula.
+      let value = 0;
+      for (const prod of ordered) {
+        const q = qty[p]?.[prod.id] ?? qty[p]?.[prod.name] ?? 0;
+        value += q * (priceFor(prod, loc) ?? 0);
+      }
       ws[cellRef] = {
         t: "n",
+        v: Math.round(value * 100) / 100,
         f: `SUMPRODUCT(${salesCol}${firstDataRow}:${salesCol}${lastDataRow},${mpRange})`,
       };
     });
