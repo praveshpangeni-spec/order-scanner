@@ -45,9 +45,9 @@
     "code": "CANDID-CREAM-30-GM",
     "unit": "30GM",
     "category": "DERMA",
-    "price": 73.49,
+    "price": 74.71,
     "prices": {
-      "Narayanghat": 73.49,
+      "Narayanghat": 74.71,
       "Butwal": 74.71,
       "Pokhara": 74.71,
       "Birganj": 74.71
@@ -65,9 +65,9 @@
     "code": "CANDID-LOTION-30-ML",
     "unit": "30ML",
     "category": "DERMA",
-    "price": 95.28,
+    "price": 97.0,
     "prices": {
-      "Narayanghat": 95.28,
+      "Narayanghat": 97.0,
       "Butwal": 97.0,
       "Pokhara": 97.0,
       "Birganj": 97.0
@@ -161,9 +161,9 @@
     "code": "DERIVA-MS-GEL-IN-15-GM",
     "unit": "15GM",
     "category": "DERMA",
-    "price": 275.57,
+    "price": 282.27,
     "prices": {
-      "Narayanghat": 275.57,
+      "Narayanghat": 282.27,
       "Butwal": 282.27,
       "Pokhara": 282.27,
       "Birganj": 282.27
@@ -181,9 +181,9 @@
     "code": "ELOVERA-CREAM-150-GM",
     "unit": "150GM",
     "category": "SKIN CARE",
-    "price": 199.67,
+    "price": 209.11,
     "prices": {
-      "Narayanghat": 199.67,
+      "Narayanghat": 209.11,
       "Butwal": 209.11,
       "Pokhara": 209.11,
       "Birganj": 209.11
@@ -200,9 +200,9 @@
     "code": "ELOVERA-CREAM-75-GM",
     "unit": "75GM",
     "category": "SKIN CARE",
-    "price": 128.92,
+    "price": 152.51,
     "prices": {
-      "Narayanghat": 128.92,
+      "Narayanghat": 152.51,
       "Butwal": 152.51,
       "Pokhara": 152.51,
       "Birganj": 152.51
@@ -236,9 +236,9 @@
     "code": "ELOVERA-PRO-CREAM-75-G",
     "unit": "75GM",
     "category": "SKIN CARE",
-    "price": 176.09,
+    "price": 190.24,
     "prices": {
-      "Narayanghat": 176.09,
+      "Narayanghat": 190.24,
       "Butwal": 190.24,
       "Pokhara": 190.24,
       "Birganj": 190.24
@@ -273,9 +273,9 @@
     "code": "GLENMARK-BILAZAP-TABLET-10-S",
     "unit": "10'S",
     "category": "DERMA",
-    "price": 118.83,
+    "price": 111.41,
     "prices": {
-      "Narayanghat": 118.83,
+      "Narayanghat": 111.41,
       "Butwal": 111.41,
       "Pokhara": 111.41,
       "Birganj": 111.41
@@ -390,9 +390,9 @@
     "code": "NEW-HAIR4U-2-60-ML",
     "unit": "60ML",
     "category": "HAIR CARE",
-    "price": 188.67,
+    "price": 196.24,
     "prices": {
-      "Narayanghat": 188.67,
+      "Narayanghat": 196.24,
       "Butwal": 196.24,
       "Pokhara": 196.24,
       "Birganj": 196.24
@@ -412,9 +412,9 @@
     "code": "NEW-HAIR4U-5-60-ML",
     "unit": "60ML",
     "category": "HAIR CARE",
-    "price": 444.61,
+    "price": 456.31,
     "prices": {
-      "Narayanghat": 444.61,
+      "Narayanghat": 456.31,
       "Butwal": 456.31,
       "Pokhara": 456.31,
       "Birganj": 456.31
@@ -433,9 +433,9 @@
     "code": "NEW-HAIR4U-10-60-ML",
     "unit": "60ML",
     "category": "HAIR CARE",
-    "price": 504.38,
+    "price": 552.3,
     "prices": {
-      "Narayanghat": 504.38,
+      "Narayanghat": 552.3,
       "Butwal": 552.3,
       "Pokhara": 552.3,
       "Birganj": 552.3
@@ -473,9 +473,9 @@
     "code": "SCALPE-SHAMPOO-75ML",
     "unit": "75ML",
     "category": "HAIR CARE",
-    "price": 167.14,
+    "price": 169.47,
     "prices": {
-      "Narayanghat": 167.14,
+      "Narayanghat": 169.47,
       "Butwal": 169.47,
       "Pokhara": 169.47,
       "Birganj": 169.47
@@ -495,9 +495,9 @@
     "code": "BONTRESS-PRO-SCALP-SERUM-60-ML",
     "unit": "60ML",
     "category": "HAIR CARE",
-    "price": 788.82,
+    "price": 786.11,
     "prices": {
-      "Narayanghat": 788.82,
+      "Narayanghat": 786.11,
       "Butwal": 786.11,
       "Pokhara": 786.11,
       "Birganj": 786.11
@@ -516,9 +516,9 @@
     "code": "RELCER-GEL-180ML",
     "unit": "180ML",
     "category": "DERMA",
-    "price": 64.0,
+    "price": 72.17,
     "prices": {
-      "Narayanghat": 64.0,
+      "Narayanghat": 72.17,
       "Butwal": 72.17,
       "Pokhara": 72.17,
       "Birganj": 72.17

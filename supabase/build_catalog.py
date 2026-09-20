@@ -84,9 +84,13 @@ def slug(s):
 def build(entries):
     out=[]
     for name,cat,unit,prices,aliases in entries:
+        # Pricing is uniform across all depots; use the Birganj (brj) price
+        # (Narayanghat figures were wrong).
+        uniform = prices.get("Birganj", prices.get("Narayanghat"))
+        prices_all = {loc: uniform for loc in LOCS}
         out.append({
             "name":name, "code":slug(name), "unit":unit, "category":cat,
-            "price":prices["Narayanghat"], "prices":prices,
+            "price":uniform, "prices":prices_all,
             "aliases":sorted(set(aliases)),
         })
     return out
