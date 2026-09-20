@@ -48,21 +48,14 @@ export function draftFromItems(
   for (const p of products) byName.set(normalize(p.name), p);
 
   return items.map((item) => {
-    let product: Product | null = null;
-    let candidates = matchProducts(item.product || item.raw, products);
-
-    if (item.in_catalog) {
-      product = byName.get(normalize(item.product)) || null;
-    }
-    if (!product) {
-      const top = candidates[0];
-      if (top && top.score >= 0.72) product = top.product;
-    }
-
+    const candidates = matchProducts(item.product || item.raw, products);
+    // Auto-select only on an exact catalog-name match (this also rescues cases
+    // where the model returned the right name but mis-set in_catalog). For
+    // everything else we leave the product unset and just offer suggestions,
+    // so a non-catalog item is never silently mapped to the wrong product.
+    const product = byName.get(normalize(item.product)) || null;
     const confidence = product
-      ? item.in_catalog
-        ? "high"
-        : confidenceOf(candidates[0]?.score ?? 0)
+      ? "high"
       : candidates.length
       ? confidenceOf(candidates[0].score)
       : "none";
