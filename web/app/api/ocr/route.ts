@@ -84,46 +84,60 @@ export async function POST(req: NextRequest) {
   const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
   const content = commaIdx >= 0 ? image.slice(commaIdx + 1) : image;
 
-  try {
-    const resp = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${key}`,
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${key}`;
+  const reqBody = JSON.stringify({
+    contents: [
       {
+        parts: [
+          { text: buildPrompt(products) },
+          { inline_data: { mime_type: mimeType, data: content } },
+        ],
+      },
+    ],
+    generationConfig: {
+      temperature: 0,
+      responseMimeType: "application/json",
+      responseSchema: RESPONSE_SCHEMA,
+    },
+  });
+
+  // The free tier sometimes returns 429/503 "overloaded" — retry with backoff.
+  const MAX_TRIES = 4;
+  let lastErr = "OCR request failed.";
+  for (let attempt = 0; attempt < MAX_TRIES; attempt++) {
+    try {
+      const resp = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                { text: buildPrompt(products) },
-                { inline_data: { mime_type: mimeType, data: content } },
-              ],
-            },
-          ],
-          generationConfig: {
-            temperature: 0,
-            responseMimeType: "application/json",
-            responseSchema: RESPONSE_SCHEMA,
-          },
-        }),
+        body: reqBody,
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (resp.ok) {
+        const text: string =
+          data?.candidates?.[0]?.content?.parts?.map((p: any) => p.text || "").join("") || "";
+        return NextResponse.json({ items: parseItems(text), raw: text }, { headers: cors() });
       }
-    );
-    const data = await resp.json();
-    if (!resp.ok) {
-      return NextResponse.json(
-        { error: data?.error?.message || "Gemini API error." },
-        { status: 502, headers: cors() }
-      );
+      const msg: string = data?.error?.message || `Gemini error ${resp.status}`;
+      const retriable =
+        [429, 500, 502, 503].includes(resp.status) ||
+        /overload|high demand|try again|unavailable|rate/i.test(msg);
+      lastErr = msg;
+      if (!retriable) {
+        return NextResponse.json({ error: msg }, { status: 502, headers: cors() });
+      }
+    } catch (e: any) {
+      lastErr = e?.message || lastErr;
     }
-    const text: string =
-      data?.candidates?.[0]?.content?.parts?.map((p: any) => p.text || "").join("") || "";
-    const items = parseItems(text);
-    return NextResponse.json({ items, raw: text }, { headers: cors() });
-  } catch (e: any) {
-    return NextResponse.json(
-      { error: e?.message || "OCR request failed." },
-      { status: 502, headers: cors() }
-    );
+    if (attempt < MAX_TRIES - 1) await sleep(700 * (attempt + 1) + Math.random() * 300);
   }
+  return NextResponse.json(
+    { error: `The OCR model is busy right now. Please try again. (${lastErr})` },
+    { status: 503, headers: cors() }
+  );
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
 }
 
 function parseItems(text: string): any[] {
