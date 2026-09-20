@@ -9,6 +9,7 @@ create table if not exists products (
   unit       text,
   category   text,
   price      numeric,
+  prices     jsonb,
   aliases    text[] default '{}',
   created_at timestamptz default now()
 );

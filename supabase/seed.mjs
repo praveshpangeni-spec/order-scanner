@@ -1,4 +1,4 @@
-// Seed the product catalog into Supabase.
+// Replace the product catalog in Supabase with supabase/products.seed.json.
 // Usage: SUPABASE_URL=... SUPABASE_ANON_KEY=... node supabase/seed.mjs
 import { createClient } from "@supabase/supabase-js";
 import { readFileSync } from "fs";
@@ -21,18 +21,25 @@ const rows = seed.map((p) => ({
   unit: p.unit ?? null,
   category: p.category ?? null,
   price: p.price ?? null,
-  aliases: [],
+  prices: p.prices ?? null,
+  aliases: p.aliases ?? [],
 }));
 
 const supabase = createClient(url, key);
-const { error, count } = await supabase
-  .from("products")
-  .upsert(rows, { onConflict: "id", count: "exact" });
+
+// Replace the whole catalog so renamed/removed products don't linger.
+await supabase.from("products").delete().neq("id", "");
+
+let { error } = await supabase.from("products").insert(rows);
+if (error && /prices/i.test(error.message)) {
+  console.warn("No 'prices' column yet — inserting without per-depot prices.");
+  console.warn("Run:  alter table products add column if not exists prices jsonb;  then reseed.");
+  const stripped = rows.map(({ prices, ...r }) => r);
+  ({ error } = await supabase.from("products").insert(stripped));
+}
 if (error) {
   console.error("Seed failed:", error.message);
   process.exit(1);
 }
-const { count: total } = await supabase
-  .from("products")
-  .select("*", { count: "exact", head: true });
-console.log(`Seeded ${rows.length} products. Catalog now has ${total} rows.`);
+const { count } = await supabase.from("products").select("*", { count: "exact", head: true });
+console.log(`Seeded ${rows.length} products. Catalog now has ${count} rows.`);

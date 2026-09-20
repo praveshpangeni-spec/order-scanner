@@ -9,6 +9,18 @@ function uid(): string {
   return `d${Date.now().toString(36)}${counter}`;
 }
 
+/** Price for a product at a given depot, falling back to the default price. */
+export function priceFor(product: Product, location?: string | null): number | null {
+  if (location && product.prices) {
+    // match on the leading depot word, e.g. "Narayanghat" in "Narayanghat ST"
+    const key = Object.keys(product.prices).find(
+      (k) => normalize(location).startsWith(normalize(k)) || normalize(k).startsWith(normalize(location))
+    );
+    if (key && product.prices[key] != null) return product.prices[key];
+  }
+  return product.price != null ? product.price : null;
+}
+
 /**
  * Turn raw OCR text + product catalog into confirmable draft items.
  * Price precedence: explicit price on the order line, else the catalog MP
@@ -42,14 +54,21 @@ export function buildDraft(text: string, products: Product[]): DraftItem[] {
  */
 export function draftFromItems(
   items: ExtractedItem[],
-  products: Product[]
+  products: Product[],
+  location?: string | null
 ): DraftItem[] {
+  // Index by canonical name AND aliases/code so an exact hit on any known
+  // spelling maps straight to the product.
   const byName = new Map<string, Product>();
-  for (const p of products) byName.set(normalize(p.name), p);
+  for (const p of products) {
+    byName.set(normalize(p.name), p);
+    if (p.code) byName.set(normalize(String(p.code)), p);
+    for (const a of p.aliases || []) byName.set(normalize(a), p);
+  }
 
   return items.map((item) => {
     const candidates = matchProducts(item.product || item.raw, products);
-    // Auto-select only on an exact catalog-name match (this also rescues cases
+    // Auto-select only on an exact catalog/alias match (this also rescues cases
     // where the model returned the right name but mis-set in_catalog). For
     // everything else we leave the product unset and just offer suggestions,
     // so a non-catalog item is never silently mapped to the wrong product.
@@ -60,7 +79,7 @@ export function draftFromItems(
       ? confidenceOf(candidates[0].score)
       : "none";
 
-    const price = product?.price != null ? product.price : null;
+    const price = product ? priceFor(product, location) : null;
     return {
       id: uid(),
       raw: item.quantity_raw ? `${item.raw}` : item.raw,

@@ -1,198 +1,640 @@
 [
   {
-    "name": "ASCORIL-D",
-    "code": "ASCORIL-D",
-    "unit": null,
-    "price": 76.55,
-    "category": "DERMA"
+    "name": "ASCORIL - D COUGH SYRUP 100ML",
+    "code": "ASCORIL-D-COUGH-SYRUP-100ML",
+    "unit": "100ML",
+    "category": "DERMA",
+    "price": 80.19,
+    "prices": {
+      "Narayanghat": 80.19,
+      "Butwal": 80.19,
+      "Pokhara": 80.19,
+      "Birganj": 80.19
+    },
+    "aliases": [
+      "ascoril d",
+      "ascoril d cough syrup",
+      "ascoril d syp",
+      "ascoril d syrup",
+      "ascoril d syrup 100ml",
+      "ascoril-d"
+    ]
   },
   {
-    "name": "CANDID CREAM 20 GM",
-    "code": "CANDID-CREAM-20-GM",
-    "unit": "20GM",
-    "price": 73.49,
-    "category": "DERMA"
+    "name": "ASCORIL-BT EXPECTORANT 100 ML",
+    "code": "ASCORIL-BT-EXPECTORANT-100-ML",
+    "unit": "100ML",
+    "category": "DERMA",
+    "price": 67.8,
+    "prices": {
+      "Narayanghat": 67.8,
+      "Butwal": 67.8,
+      "Pokhara": 67.8,
+      "Birganj": 67.8
+    },
+    "aliases": [
+      "ascoril b t",
+      "ascoril bt",
+      "ascoril bt expectorant",
+      "ascoril et",
+      "ascoril-bt"
+    ]
   },
   {
-    "name": "CANDID LOTION 30ML",
-    "code": "CANDID-LOTION-30ML",
-    "unit": "30ML",
-    "price": 95.27,
-    "category": "DERMA"
-  },
-  {
-    "name": "CANDID POWDER 100GM",
-    "code": "CANDID-POWDER-100GM",
-    "unit": "100GM",
-    "price": 91.13,
-    "category": "DERMA"
-  },
-  {
-    "name": "CANDID POWDER 50 GM",
-    "code": "CANDID-POWDER-50-GM",
-    "unit": "50GM",
-    "price": 58.32,
-    "category": "DERMA"
-  },
-  {
-    "name": "LULICAN CREAM 30 GM",
-    "code": "LULICAN-CREAM-30-GM",
+    "name": "Candid Cream 30 gm",
+    "code": "CANDID-CREAM-30-GM",
     "unit": "30GM",
-    "price": 273.38,
-    "category": "DERMA"
+    "category": "DERMA",
+    "price": 73.49,
+    "prices": {
+      "Narayanghat": 73.49,
+      "Butwal": 74.71,
+      "Pokhara": 74.71,
+      "Birganj": 74.71
+    },
+    "aliases": [
+      "candid cream",
+      "candid cream 30gm",
+      "candid crm 30gm",
+      "candid plain cream",
+      "candid plain cream 30gm"
+    ]
   },
   {
-    "name": "LULICAN CREAM 20 GM",
-    "code": "LULICAN-CREAM-20-GM",
-    "unit": "20GM",
-    "price": 123.93,
-    "category": "DERMA"
-  },
-  {
-    "name": "LULICAN LOTION 30 ML",
-    "code": "LULICAN-LOTION-30-ML",
+    "name": "CANDID LOTION 30 ML",
+    "code": "CANDID-LOTION-30-ML",
     "unit": "30ML",
-    "price": 171.25,
-    "category": "DERMA"
+    "category": "DERMA",
+    "price": 95.28,
+    "prices": {
+      "Narayanghat": 95.28,
+      "Butwal": 97.0,
+      "Pokhara": 97.0,
+      "Birganj": 97.0
+    },
+    "aliases": [
+      "candid cotton 30ml",
+      "candid lotion",
+      "candid lotion 30 ml",
+      "candid lotion 30ml"
+    ]
   },
   {
-    "name": "SUPIROCIN OINT  5 GM",
-    "code": "SUPIROCIN-OINT-5-GM",
-    "unit": "5GM",
-    "price": 82.74,
-    "category": "DERMA"
+    "name": "CANDID POWDER 100 GM",
+    "code": "CANDID-POWDER-100-GM",
+    "unit": "100GM",
+    "category": "DERMA",
+    "price": 99.88,
+    "prices": {
+      "Narayanghat": 99.88,
+      "Butwal": 99.88,
+      "Pokhara": 99.88,
+      "Birganj": 99.88
+    },
+    "aliases": [
+      "candid powder",
+      "candid powder 100 gm",
+      "candid powder 100gm"
+    ]
   },
   {
-    "name": "SUPIROCIN -B- OINT 5 GMS",
-    "code": "SUPIROCIN-B-OINT-5-GMS",
-    "unit": "5GMS",
-    "price": 135.6,
-    "category": "DERMA"
-  },
-  {
-    "name": "MOMATE CREAM 20GM",
-    "code": "MOMATE-CREAM-20GM",
-    "unit": "20GM",
-    "price": 217.25,
-    "category": "DERMA"
-  },
-  {
-    "name": "MOMATE OINTMENT 15 GM",
-    "code": "MOMATE-OINTMENT-15-GM",
-    "unit": "15GM",
-    "price": 206.31,
-    "category": "DERMA"
-  },
-  {
-    "name": "MOMATE-F",
-    "code": "MOMATE-F",
-    "unit": null,
-    "price": 227.45,
-    "category": "DERMA"
-  },
-  {
-    "name": "DERIVA MS GEL 15 GM",
-    "code": "DERIVA-MS-GEL-15-GM",
-    "unit": "15GM",
-    "price": 251.51,
-    "category": "DERMA"
-  },
-  {
-    "name": "D ACNE GEL",
-    "code": "D-ACNE-GEL",
-    "unit": null,
-    "price": 117.74,
-    "category": "DERMA"
-  },
-  {
-    "name": "GLENMARK BILAZAP TABLET 10'S",
-    "code": "GLENMARK-BILAZAP-TABLET-10-S",
-    "unit": "10'S",
-    "price": 118.83,
-    "category": "DERMA"
-  },
-  {
-    "name": "HAIR FOR U 2%",
-    "code": "HAIR-FOR-U-2",
-    "unit": null,
-    "price": 188.66,
-    "category": "HAIR CARE"
-  },
-  {
-    "name": "HAIR FOR U 5%",
-    "code": "HAIR-FOR-U-5",
-    "unit": null,
-    "price": 421.88,
-    "category": "HAIR CARE"
-  },
-  {
-    "name": "HAIR 4 U 10%",
-    "code": "HAIR-4-U-10",
-    "unit": null,
-    "price": 447.4,
-    "category": "HAIR CARE"
-  },
-  {
-    "name": "SCALPE LOTION 60ML",
-    "code": "SCALPE-LOTION-60ML",
+    "name": "D'ACNE FOAMING FACE WASH 60 ML",
+    "code": "D-ACNE-FOAMING-FACE-WASH-60-ML",
     "unit": "60ML",
-    "price": 167.14,
-    "category": "HAIR CARE"
+    "category": "SKIN CARE",
+    "price": 292.35,
+    "prices": {
+      "Narayanghat": 292.35,
+      "Butwal": 292.35,
+      "Pokhara": 292.35,
+      "Birganj": 292.35
+    },
+    "aliases": [
+      "d acne face wash",
+      "d acne foaming face wash",
+      "d acne foaming face wash 60ml",
+      "d'acne forming face wash",
+      "dacne face wash",
+      "dacne foaming face wash"
+    ]
+  },
+  {
+    "name": "D'ACNE GEL 10 GM",
+    "code": "D-ACNE-GEL-10-GM",
+    "unit": "10GM",
+    "category": "DERMA",
+    "price": 128.67,
+    "prices": {
+      "Narayanghat": 128.67,
+      "Butwal": 128.67,
+      "Pokhara": 128.67,
+      "Birganj": 128.67
+    },
+    "aliases": [
+      "d acne gel",
+      "d acne gel 10gm",
+      "d'acne gel",
+      "dacne gel"
+    ]
+  },
+  {
+    "name": "D'ACNE SOFT 100 GM",
+    "code": "D-ACNE-SOFT-100-GM",
+    "unit": "100GM",
+    "category": "SKIN CARE",
+    "price": 234.59,
+    "prices": {
+      "Narayanghat": 234.59,
+      "Butwal": 234.59,
+      "Pokhara": 234.59,
+      "Birganj": 234.59
+    },
+    "aliases": [
+      "d acne soft",
+      "d acne soft 100gm",
+      "d'acne soft",
+      "dacne soft"
+    ]
+  },
+  {
+    "name": "DERIVA MS GEL IN 15 GM",
+    "code": "DERIVA-MS-GEL-IN-15-GM",
+    "unit": "15GM",
+    "category": "DERMA",
+    "price": 275.57,
+    "prices": {
+      "Narayanghat": 275.57,
+      "Butwal": 282.27,
+      "Pokhara": 282.27,
+      "Birganj": 282.27
+    },
+    "aliases": [
+      "deriva gel 15gm",
+      "deriva ms gel",
+      "deriva ms gel 15gm",
+      "deriva ms gel in 15 gm",
+      "desiva ms gel"
+    ]
   },
   {
     "name": "ELOVERA CREAM 150 GM",
     "code": "ELOVERA-CREAM-150-GM",
     "unit": "150GM",
-    "price": 191.97,
-    "category": "SKIN CARE"
+    "category": "SKIN CARE",
+    "price": 199.67,
+    "prices": {
+      "Narayanghat": 199.67,
+      "Butwal": 209.11,
+      "Pokhara": 209.11,
+      "Birganj": 209.11
+    },
+    "aliases": [
+      "elovera 150 gm crm",
+      "elovera 150gm cream",
+      "elovera cream 150 gm",
+      "elovera cream 150gm"
+    ]
   },
   {
     "name": "ELOVERA CREAM 75 GM",
     "code": "ELOVERA-CREAM-75-GM",
     "unit": "75GM",
-    "price": 125.78,
-    "category": "SKIN CARE"
+    "category": "SKIN CARE",
+    "price": 128.92,
+    "prices": {
+      "Narayanghat": 128.92,
+      "Butwal": 152.51,
+      "Pokhara": 152.51,
+      "Birganj": 152.51
+    },
+    "aliases": [
+      "elovera 75 gm crm",
+      "elovera cream 75 gm",
+      "elovera cream 75gm"
+    ]
   },
   {
-    "name": "ELOVERA PRO MAX CREAM",
-    "code": "ELOVERA-PRO-MAX-CREAM",
-    "unit": null,
-    "price": 157.62,
-    "category": "SKIN CARE"
+    "name": "ELOVERA MOISTURIZING BODY WASH 250 ML",
+    "code": "ELOVERA-MOISTURIZING-BODY-WASH-250-ML",
+    "unit": "250ML",
+    "category": "SKIN CARE",
+    "price": 323.93,
+    "prices": {
+      "Narayanghat": 323.93,
+      "Butwal": 323.93,
+      "Pokhara": 323.93,
+      "Birganj": 323.93
+    },
+    "aliases": [
+      "elovera body wash",
+      "elovera moisturising body wash",
+      "elovera moisturizing body wash"
+    ]
   },
   {
-    "name": "ELOVERA PRO MAX LOTION",
-    "code": "ELOVERA-PRO-MAX-LOTION",
-    "unit": null,
-    "price": 191.29,
-    "category": "SKIN CARE"
+    "name": "ELOVERA PRO CREAM 75 G",
+    "code": "ELOVERA-PRO-CREAM-75-G",
+    "unit": "75GM",
+    "category": "SKIN CARE",
+    "price": 176.09,
+    "prices": {
+      "Narayanghat": 176.09,
+      "Butwal": 190.24,
+      "Pokhara": 190.24,
+      "Birganj": 190.24
+    },
+    "aliases": [
+      "elovera pro cream",
+      "elovera pro cream 75 gm",
+      "elovera pro cream 75g",
+      "elovera pro max cream"
+    ]
   },
   {
-    "name": "LA SHIELD GEL 60ML",
-    "code": "LA-SHIELD-GEL-60ML",
-    "unit": "60ML",
-    "price": 424.5,
-    "category": "SKIN CARE"
+    "name": "ELOVERA PRO LOTION 150 G",
+    "code": "ELOVERA-PRO-LOTION-150-G",
+    "unit": "150GM",
+    "category": "SKIN CARE",
+    "price": 286.93,
+    "prices": {
+      "Narayanghat": 286.93,
+      "Butwal": 286.93,
+      "Pokhara": 286.93,
+      "Birganj": 286.93
+    },
+    "aliases": [
+      "elovera pro lotion",
+      "elovera pro lotion 150g",
+      "elovera pro max lotion"
+    ]
   },
   {
-    "name": "LA SHIELD LITE",
-    "code": "LA-SHIELD-LITE",
-    "unit": null,
+    "name": "GLENMARK BILAZAP TABLET 10'S",
+    "code": "GLENMARK-BILAZAP-TABLET-10-S",
+    "unit": "10'S",
+    "category": "DERMA",
+    "price": 118.83,
+    "prices": {
+      "Narayanghat": 118.83,
+      "Butwal": 111.41,
+      "Pokhara": 111.41,
+      "Birganj": 111.41
+    },
+    "aliases": [
+      "bilazap",
+      "bilazap 10s",
+      "bilazap tab",
+      "bilazap tablet",
+      "glenmark bilazap"
+    ]
+  },
+  {
+    "name": "LA SHIELD LITE GEL SPF 50+50 GM",
+    "code": "LA-SHIELD-LITE-GEL-SPF-50-50-GM",
+    "unit": "50GM",
+    "category": "SKIN CARE",
     "price": 513.59,
-    "category": "SKIN CARE"
+    "prices": {
+      "Narayanghat": 513.59,
+      "Butwal": 513.59,
+      "Pokhara": 513.59,
+      "Birganj": 513.59
+    },
+    "aliases": [
+      "la shield lite",
+      "la shield lite gel",
+      "la shield lite spf 50",
+      "lashield lite"
+    ]
   },
   {
-    "name": "D ACNE FACE WASH",
-    "code": "D-ACNE-FACE-WASH",
-    "unit": null,
-    "price": 272.75,
-    "category": "SKIN CARE"
+    "name": "LA SHIELD SUNSCREEN GEL SPF 40 50 GM",
+    "code": "LA-SHIELD-SUNSCREEN-GEL-SPF-40-50-GM",
+    "unit": "50GM",
+    "category": "SKIN CARE",
+    "price": 445.46,
+    "prices": {
+      "Narayanghat": 445.46,
+      "Butwal": 445.46,
+      "Pokhara": 445.46,
+      "Birganj": 445.46
+    },
+    "aliases": [
+      "la shield gel",
+      "la shield gel 60ml",
+      "la shield spf 40",
+      "la shield sunscreen",
+      "la shield sunscreen gel",
+      "lashield sunscreen"
+    ]
   },
   {
-    "name": "D ACNE SOFT",
-    "code": "D-ACNE-SOFT",
+    "name": "LULICAN CREAM 20 GM",
+    "code": "LULICAN-CREAM-20-GM",
+    "unit": "20GM",
+    "category": "DERMA",
+    "price": 116.19,
+    "prices": {
+      "Narayanghat": 116.19,
+      "Butwal": 116.19,
+      "Pokhara": 116.19,
+      "Birganj": 116.19
+    },
+    "aliases": [
+      "lulican 20 gms",
+      "lulican 20gm",
+      "lulican cream 20 gm",
+      "lulican cream 20gm"
+    ]
+  },
+  {
+    "name": "LULICAN CREAM 30 GM",
+    "code": "LULICAN-CREAM-30-GM",
+    "unit": "30GM",
+    "category": "DERMA",
+    "price": 273.38,
+    "prices": {
+      "Narayanghat": 273.38,
+      "Butwal": 273.38,
+      "Pokhara": 273.38,
+      "Birganj": 273.38
+    },
+    "aliases": [
+      "lulican 30 gms",
+      "lulican 30gm",
+      "lulican cream",
+      "lulican cream 30 gm",
+      "lulican cream 30gm"
+    ]
+  },
+  {
+    "name": "LULICAN LOTION 30 ML",
+    "code": "LULICAN-LOTION-30-ML",
+    "unit": "30ML",
+    "category": "DERMA",
+    "price": 177.7,
+    "prices": {
+      "Narayanghat": 177.7,
+      "Butwal": 177.7,
+      "Pokhara": 177.7,
+      "Birganj": 177.7
+    },
+    "aliases": [
+      "lulican lotion",
+      "lulican lotion 30 ml",
+      "lulican lotion 30ml"
+    ]
+  },
+  {
+    "name": "NEW HAIR4U 2% 60 ML",
+    "code": "NEW-HAIR4U-2-60-ML",
+    "unit": "60ML",
+    "category": "HAIR CARE",
+    "price": 188.67,
+    "prices": {
+      "Narayanghat": 188.67,
+      "Butwal": 196.24,
+      "Pokhara": 196.24,
+      "Birganj": 196.24
+    },
+    "aliases": [
+      "hair 4 u 2%",
+      "hair 40 2%",
+      "hair 4u 2%",
+      "hair4u 2%",
+      "hair4u2%",
+      "new hair 4u 2%",
+      "new hair4u 2%"
+    ]
+  },
+  {
+    "name": "NEW HAIR4U 5% 60 ML",
+    "code": "NEW-HAIR4U-5-60-ML",
+    "unit": "60ML",
+    "category": "HAIR CARE",
+    "price": 444.61,
+    "prices": {
+      "Narayanghat": 444.61,
+      "Butwal": 456.31,
+      "Pokhara": 456.31,
+      "Birganj": 456.31
+    },
+    "aliases": [
+      "hair 4 u 5%",
+      "hair 40 5%",
+      "hair 4u 5%",
+      "hair4u 5%",
+      "new hair 4u 5%",
+      "new hair4u 5%"
+    ]
+  },
+  {
+    "name": "NEW HAIR4U 10% 60 ML",
+    "code": "NEW-HAIR4U-10-60-ML",
+    "unit": "60ML",
+    "category": "HAIR CARE",
+    "price": 504.38,
+    "prices": {
+      "Narayanghat": 504.38,
+      "Butwal": 552.3,
+      "Pokhara": 552.3,
+      "Birganj": 552.3
+    },
+    "aliases": [
+      "hair 4 u 10%",
+      "hair 40 10%",
+      "hair 4u 10%",
+      "hair4u 10%",
+      "new hair 4u 10%"
+    ]
+  },
+  {
+    "name": "HAIR 4 U SHAMPOO 100 ML",
+    "code": "HAIR-4-U-SHAMPOO-100-ML",
+    "unit": "100ML",
+    "category": "HAIR CARE",
+    "price": 197.69,
+    "prices": {
+      "Narayanghat": 197.69,
+      "Butwal": 197.69,
+      "Pokhara": 197.69,
+      "Birganj": 197.69
+    },
+    "aliases": [
+      "hair 4 u shampoo",
+      "hair 40 shampoo",
+      "hair 4u shampoo",
+      "hair4u shampoo",
+      "new hair 4u shampoo"
+    ]
+  },
+  {
+    "name": "SCALPE + SHAMPOO 75ML",
+    "code": "SCALPE-SHAMPOO-75ML",
+    "unit": "75ML",
+    "category": "HAIR CARE",
+    "price": 167.14,
+    "prices": {
+      "Narayanghat": 167.14,
+      "Butwal": 169.47,
+      "Pokhara": 169.47,
+      "Birganj": 169.47
+    },
+    "aliases": [
+      "scalpe + shampoo",
+      "scalpe lotion",
+      "scalpe plus shampoo",
+      "scalpe shampoo",
+      "scalpe shampoo 75ml",
+      "scalpe+",
+      "scalpe+ shampoo"
+    ]
+  },
+  {
+    "name": "BONTRESS PRO + SCALP SERUM 60 ML",
+    "code": "BONTRESS-PRO-SCALP-SERUM-60-ML",
+    "unit": "60ML",
+    "category": "HAIR CARE",
+    "price": 788.82,
+    "prices": {
+      "Narayanghat": 788.82,
+      "Butwal": 786.11,
+      "Pokhara": 786.11,
+      "Birganj": 786.11
+    },
+    "aliases": [
+      "bontress",
+      "bontress pro +",
+      "bontress pro + scalp serum",
+      "bontress pro plus",
+      "bontress pro plus scalp serum",
+      "bontress serum"
+    ]
+  },
+  {
+    "name": "RELCER GEL 180ml",
+    "code": "RELCER-GEL-180ML",
+    "unit": "180ML",
+    "category": "DERMA",
+    "price": 64.0,
+    "prices": {
+      "Narayanghat": 64.0,
+      "Butwal": 72.17,
+      "Pokhara": 72.17,
+      "Birganj": 72.17
+    },
+    "aliases": [
+      "relcer",
+      "relcer gel",
+      "relcer gel 180 ml",
+      "relcer gel 180ml"
+    ]
+  },
+  {
+    "name": "MOMATE CREAM 20GM",
+    "code": "MOMATE-CREAM-20GM",
+    "unit": "20GM",
+    "category": "DERMA",
+    "price": 217.25,
+    "prices": {
+      "Narayanghat": 217.25,
+      "Butwal": 217.25,
+      "Pokhara": 217.25,
+      "Birganj": 217.25
+    },
+    "aliases": [
+      "momate cream",
+      "momate cream 20gm",
+      "momate crm 20gm"
+    ]
+  },
+  {
+    "name": "MOMATE OINTMENT 15 GM",
+    "code": "MOMATE-OINTMENT-15-GM",
+    "unit": "15GM",
+    "category": "DERMA",
+    "price": 206.31,
+    "prices": {
+      "Narayanghat": 206.31,
+      "Butwal": 206.31,
+      "Pokhara": 206.31,
+      "Birganj": 206.31
+    },
+    "aliases": [
+      "momate oint 15gm",
+      "momate ointment",
+      "momate ointment 15gm"
+    ]
+  },
+  {
+    "name": "MOMATE-F",
+    "code": "MOMATE-F",
     "unit": null,
-    "price": 214.35,
-    "category": "SKIN CARE"
+    "category": "DERMA",
+    "price": 227.45,
+    "prices": {
+      "Narayanghat": 227.45,
+      "Butwal": 227.45,
+      "Pokhara": 227.45,
+      "Birganj": 227.45
+    },
+    "aliases": [
+      "momate f",
+      "momate f cream",
+      "momate-f"
+    ]
+  },
+  {
+    "name": "SUPIROCIN OINT 5 GM",
+    "code": "SUPIROCIN-OINT-5-GM",
+    "unit": "5GM",
+    "category": "DERMA",
+    "price": 82.74,
+    "prices": {
+      "Narayanghat": 82.74,
+      "Butwal": 82.74,
+      "Pokhara": 82.74,
+      "Birganj": 82.74
+    },
+    "aliases": [
+      "supirocin oint",
+      "supirocin oint 5gm",
+      "supirocin ointment 5gm"
+    ]
+  },
+  {
+    "name": "SUPIROCIN -B- OINT 5 GMS",
+    "code": "SUPIROCIN-B-OINT-5-GMS",
+    "unit": "5GM",
+    "category": "DERMA",
+    "price": 135.6,
+    "prices": {
+      "Narayanghat": 135.6,
+      "Butwal": 135.6,
+      "Pokhara": 135.6,
+      "Birganj": 135.6
+    },
+    "aliases": [
+      "supirocin b oint",
+      "supirocin b ointment",
+      "supirocin-b oint 5gm"
+    ]
+  },
+  {
+    "name": "CANDID POWDER 50 GM",
+    "code": "CANDID-POWDER-50-GM",
+    "unit": "50GM",
+    "category": "DERMA",
+    "price": 58.32,
+    "prices": {
+      "Narayanghat": 58.32,
+      "Butwal": 58.32,
+      "Pokhara": 58.32,
+      "Birganj": 58.32
+    },
+    "aliases": [
+      "candid powder 50 gm",
+      "candid powder 50gm"
+    ]
   }
 ]

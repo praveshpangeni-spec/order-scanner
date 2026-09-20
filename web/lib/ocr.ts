@@ -1,5 +1,10 @@
 "use client";
-import type { ExtractedItem } from "@order/shared";
+import type { ExtractedItem, ExtractedHeader } from "@order/shared";
+
+export interface ExtractResult {
+  header: ExtractedHeader;
+  items: ExtractedItem[];
+}
 
 export type OcrProgress = (info: { status: string; progress: number }) => void;
 
@@ -33,12 +38,12 @@ function blobToDataUrl(blob: Blob): Promise<string> {
   });
 }
 
-/** Extract structured order lines from one image via /api/ocr (Gemini). */
+/** Extract header + structured order lines from one image via /api/ocr (Gemini). */
 export async function extractImage(
   file: Blob,
   productNames: string[],
   onProgress?: OcrProgress
-): Promise<ExtractedItem[]> {
+): Promise<ExtractResult> {
   onProgress?.({ status: "preparing", progress: 0.1 });
   const img = await prepImage(file);
   const dataUrl = await blobToDataUrl(img);
@@ -51,19 +56,21 @@ export async function extractImage(
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data?.error || `OCR failed (${res.status})`);
   onProgress?.({ status: "done", progress: 1 });
-  return (data.items as ExtractedItem[]) || [];
+  return { header: (data.header as ExtractedHeader) || {}, items: (data.items as ExtractedItem[]) || [] };
 }
 
-/** Extract from several images and concatenate the line items. */
+/** Extract from several images; concatenates items, keeps the first header found. */
 export async function extractImages(
   files: Blob[],
   productNames: string[],
   onProgress?: (fileIndex: number, info: { status: string; progress: number }) => void
-): Promise<ExtractedItem[]> {
+): Promise<ExtractResult> {
   const all: ExtractedItem[] = [];
+  let header: ExtractedHeader = {};
   for (let i = 0; i < files.length; i++) {
-    const items = await extractImage(files[i], productNames, (info) => onProgress?.(i, info));
-    all.push(...items);
+    const r = await extractImage(files[i], productNames, (info) => onProgress?.(i, info));
+    all.push(...r.items);
+    if (!header.customer && !header.location) header = r.header;
   }
-  return all;
+  return { header, items: all };
 }

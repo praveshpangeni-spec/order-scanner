@@ -1,5 +1,10 @@
 import React, { forwardRef, useImperativeHandle, useCallback } from "react";
-import type { ExtractedItem } from "@order/shared";
+import type { ExtractedItem, ExtractedHeader } from "@order/shared";
+
+export interface OcrResult {
+  header: ExtractedHeader;
+  items: ExtractedItem[];
+}
 
 /**
  * OCR engine for mobile: posts the image + catalog to the hosted /api/ocr route
@@ -14,7 +19,7 @@ export interface OcrEngineHandle {
     dataUrl: string,
     productNames: string[],
     onProgress?: (p: number) => void
-  ) => Promise<ExtractedItem[]>;
+  ) => Promise<OcrResult>;
 }
 
 export const OcrEngine = forwardRef<OcrEngineHandle>((_props, ref) => {
@@ -29,7 +34,10 @@ export const OcrEngine = forwardRef<OcrEngineHandle>((_props, ref) => {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.error || `OCR failed (${res.status})`);
       onProgress?.(1);
-      return (data.items as ExtractedItem[]) || [];
+      return {
+        header: (data.header as ExtractedHeader) || {},
+        items: (data.items as ExtractedItem[]) || [],
+      };
     },
     []
   );

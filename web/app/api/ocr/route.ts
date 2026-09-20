@@ -13,11 +13,18 @@ export const maxDuration = 45;
 
 const MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
 
+const DEPOTS = ["Narayanghat", "Butwal", "Pokhara", "Birganj"];
+
 function buildPrompt(catalog: string[]): string {
   const list = catalog.length ? catalog.join("\n") : "(none provided)";
   return `You extract a wholesale product order from an image. It may be a handwritten note, a numbered list, or a PRINTED order form / order book with a quantity column. Read the whole image carefully.
 
-Return one object per ordered line. For each line:
+Also read the order HEADER and return it as "header":
+- "customer": the party / shop / distributor name the order is from or to (e.g. "Rautoks Pharma", "Wings Medico"). Empty string if not visible.
+- "location": if a city/depot is written, return the closest match from this list: ${DEPOTS.join(", ")} (note "Birgunj" = "Birganj"). Empty string if none.
+- "date": the order date if written (as on the page), else empty string.
+
+Return one object per ordered line under "items". For each line:
 - "raw": the line exactly as written (product + quantity).
 - "product": if the item clearly matches one of the CATALOG names below, output that EXACT catalog name (copy it verbatim). Otherwise output the product name as written on the order.
 - "in_catalog": true ONLY when "product" is an exact catalog name.
@@ -38,6 +45,14 @@ ${list}`;
 const RESPONSE_SCHEMA = {
   type: "OBJECT",
   properties: {
+    header: {
+      type: "OBJECT",
+      properties: {
+        customer: { type: "STRING" },
+        location: { type: "STRING" },
+        date: { type: "STRING" },
+      },
+    },
     items: {
       type: "ARRAY",
       items: {
@@ -115,7 +130,8 @@ export async function POST(req: NextRequest) {
       if (resp.ok) {
         const text: string =
           data?.candidates?.[0]?.content?.parts?.map((p: any) => p.text || "").join("") || "";
-        return NextResponse.json({ items: parseItems(text), raw: text }, { headers: cors() });
+        const parsed = parseResult(text);
+        return NextResponse.json({ ...parsed, raw: text }, { headers: cors() });
       }
       const msg: string = data?.error?.message || `Gemini error ${resp.status}`;
       const retriable =
@@ -140,20 +156,20 @@ function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-function parseItems(text: string): any[] {
-  if (!text) return [];
+function parseResult(text: string): { header: any; items: any[] } {
+  const empty = { header: {}, items: [] as any[] };
+  if (!text) return empty;
   let t = text.trim();
   // Strip code fences if the model wrapped the JSON.
   const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (fence) t = fence[1].trim();
   try {
     const obj = JSON.parse(t);
-    if (Array.isArray(obj)) return obj;
-    if (Array.isArray(obj?.items)) return obj.items;
+    if (Array.isArray(obj)) return { header: {}, items: obj };
+    return { header: obj?.header || {}, items: Array.isArray(obj?.items) ? obj.items : [] };
   } catch {
-    /* fall through */
+    return empty;
   }
-  return [];
 }
 
 export async function OPTIONS() {

@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import type { Product, DraftItem, MatchConfidence, ExtractedItem } from "@order/shared";
-import { draftFromItems } from "@order/shared";
+import { draftFromItems, priceFor } from "@order/shared";
 import { OcrEngine, OcrEngineHandle } from "../ocr";
 import { getProducts, createOrder, LOCATIONS, isSupabaseConfigured } from "../db";
 import { colors, confidenceStyle, money } from "../theme";
@@ -88,13 +88,28 @@ export default function ScanScreen() {
     try {
       const names = products.map((p) => p.name);
       const all: ExtractedItem[] = [];
+      let head: { customer?: string; location?: string } = {};
       for (let i = 0; i < images.length; i++) {
-        const items = await ocrRef.current.recognize(images[i], names, (p) =>
+        const res = await ocrRef.current.recognize(images[i], names, (p) =>
           setProgress(Math.round(((i + p) / images.length) * 100))
         );
-        all.push(...items);
+        all.push(...res.items);
+        if (!head.customer && !head.location) head = res.header;
       }
-      const draft = draftFromItems(all, products);
+      let loc = location;
+      if (head.location) {
+        const m = LOCATIONS.find(
+          (l) =>
+            l.toLowerCase() === head.location!.toLowerCase() ||
+            head.location!.toLowerCase().includes(l.toLowerCase())
+        );
+        if (m) {
+          loc = m;
+          setLocation(m);
+        }
+      }
+      if (head.customer && !customer.trim()) setCustomer(head.customer);
+      const draft = draftFromItems(all, products, loc);
       setRows(
         draft.map((d) => ({
           ...d,
@@ -117,7 +132,7 @@ export default function ScanScreen() {
     setRows((rs) =>
       rs.map((r) => {
         if (r.id !== id) return r;
-        const price = r.price != null ? r.price : p?.price ?? null;
+        const price = p ? priceFor(p, location) : r.price;
         return { ...r, product: p, price, include: true, confidence: "high" as MatchConfidence };
       })
     );

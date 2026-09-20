@@ -6,7 +6,10 @@ export interface Product {
   code?: string | null;
   unit?: string | null;
   category?: string | null;
+  /** Default price (used when no per-location price applies). */
   price?: number | null;
+  /** Per-depot price map, e.g. { Narayanghat: 80.19, Butwal: 80.19 }. */
+  prices?: Record<string, number> | null;
   /** Extra names/spellings that should also match this product. */
   aliases?: string[];
 }
@@ -63,6 +66,13 @@ export interface OrderItem {
   unit_price: number;
   line_total: number;
   raw_text?: string | null;
+}
+
+/** The order header read from the image (for pre-filling the form). */
+export interface ExtractedHeader {
+  customer?: string;
+  location?: string;
+  date?: string;
 }
 
 /** A line item extracted from an order image by the vision model. */

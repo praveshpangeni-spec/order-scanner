@@ -2,12 +2,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { Product, DraftItem, MatchConfidence } from "@order/shared";
-import { draftFromItems } from "@order/shared";
+import { draftFromItems, priceFor } from "@order/shared";
 import { extractImages } from "@/lib/ocr";
 import {
   getProducts,
   createOrder,
   LOCATIONS,
+  PARTIES,
   isSupabaseConfigured,
 } from "@/lib/db";
 
@@ -75,12 +76,26 @@ export default function ScanFlow() {
     setPhase("ocr");
     setProgress({ i: 0, pct: 0 });
     try {
-      const items = await extractImages(
+      const { header, items } = await extractImages(
         files,
         products.map((p) => p.name),
         (i, info) => setProgress({ i, pct: Math.round(info.progress * 100) })
       );
-      const draft = draftFromItems(items, products);
+      // Pre-fill header fields from what the model read on the order.
+      let loc = location;
+      if (header.location) {
+        const m = LOCATIONS.find(
+          (l) =>
+            l.toLowerCase() === header.location!.toLowerCase() ||
+            header.location!.toLowerCase().includes(l.toLowerCase())
+        );
+        if (m) {
+          loc = m;
+          setLocation(m);
+        }
+      }
+      if (header.customer && !customer.trim()) setCustomer(header.customer);
+      const draft = draftFromItems(items, products, loc);
       setRows(
         draft.map((d) => ({
           ...d,
@@ -103,7 +118,7 @@ export default function ScanFlow() {
     setRows((rs) =>
       rs.map((r) => {
         if (r.id !== id) return r;
-        const price = r.price != null ? r.price : p?.price ?? null;
+        const price = p ? priceFor(p, location) : r.price;
         return {
           ...r,
           product: p,
@@ -229,7 +244,13 @@ export default function ScanFlow() {
                   value={customer}
                   onChange={(e) => setCustomer(e.target.value)}
                   placeholder="e.g. Ramesh Medical"
+                  list="parties"
                 />
+                <datalist id="parties">
+                  {(PARTIES[location] || []).map((p) => (
+                    <option key={p} value={p} />
+                  ))}
+                </datalist>
               </label>
               <label className="text-sm">
                 <span className="mb-1 block text-slate-600">Reference / Bill no.</span>

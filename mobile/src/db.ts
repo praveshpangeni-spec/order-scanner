@@ -3,6 +3,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import type { Product, Order, OrderItem } from "@order/shared";
 import seed from "./products.seed.json";
+import partiesData from "./parties.json";
+
+export const PARTIES: Record<string, string[]> = partiesData as Record<string, string[]>;
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const key = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
@@ -16,13 +19,7 @@ export const supabase: SupabaseClient | null =
 
 export const isSupabaseConfigured = Boolean(url && key);
 
-export const LOCATIONS = [
-  "Narayanghat ST",
-  "Butwal ST",
-  "Pokhara ST",
-  "Birganj ST",
-  "Narayanghat SD",
-];
+export const LOCATIONS = ["Narayanghat", "Butwal", "Pokhara", "Birganj"];
 
 const K = {
   products: "order_ocr_products",
@@ -58,7 +55,8 @@ function seededProducts(): Product[] {
     unit: p.unit ?? null,
     category: p.category ?? null,
     price: p.price ?? null,
-    aliases: [],
+    prices: p.prices ?? null,
+    aliases: p.aliases ?? [],
   }));
 }
 

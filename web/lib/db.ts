@@ -2,6 +2,10 @@
 import type { Product, Order, OrderItem } from "@order/shared";
 import { supabase, isSupabaseConfigured } from "./supabase";
 import seed from "./products.seed.json";
+import partiesData from "./parties.json";
+
+/** Known parties (customers) per depot, for suggestions. */
+export const PARTIES: Record<string, string[]> = partiesData as Record<string, string[]>;
 
 const LS = {
   products: "order_ocr_products",
@@ -9,13 +13,7 @@ const LS = {
   items: "order_ocr_items",
 };
 
-export const LOCATIONS = [
-  "Narayanghat ST",
-  "Butwal ST",
-  "Pokhara ST",
-  "Birganj ST",
-  "Narayanghat SD",
-];
+export const LOCATIONS = ["Narayanghat", "Butwal", "Pokhara", "Birganj"];
 
 function uuid(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto)
@@ -48,7 +46,8 @@ function seededProducts(): Product[] {
     unit: p.unit ?? null,
     category: p.category ?? null,
     price: p.price ?? null,
-    aliases: [],
+    prices: p.prices ?? null,
+    aliases: p.aliases ?? [],
   }));
 }
 
