@@ -305,14 +305,8 @@ export default function ScanFlow() {
               </button>
             </div>
             {phase === "input" && (
-              <button
-                className="btn-primary mt-4"
-                disabled={files.length === 0 || !month || (usage != null && usage.remaining <= 0)}
-                onClick={runScan}
-              >
-                {usage != null && usage.remaining <= 0
-                  ? "Daily limit reached"
-                  : `Scan ${files.length > 0 ? `${files.length} image${files.length > 1 ? "s" : ""}` : ""}`}
+              <button className="btn-primary mt-4" disabled={files.length === 0 || !month} onClick={runScan}>
+                Scan {files.length > 0 ? `${files.length} image${files.length > 1 ? "s" : ""}` : ""}
               </button>
             )}
           </div>
