@@ -1,4 +1,5 @@
 "use client";
+import type { ExtractedItem } from "@order/shared";
 
 export type OcrProgress = (info: { status: string; progress: number }) => void;
 
@@ -32,8 +33,12 @@ function blobToDataUrl(blob: Blob): Promise<string> {
   });
 }
 
-/** OCR one image via the server-side /api/ocr route (Google Cloud Vision). */
-export async function ocrImage(file: Blob, onProgress?: OcrProgress): Promise<string> {
+/** Extract structured order lines from one image via /api/ocr (Gemini). */
+export async function extractImage(
+  file: Blob,
+  productNames: string[],
+  onProgress?: OcrProgress
+): Promise<ExtractedItem[]> {
   onProgress?.({ status: "preparing", progress: 0.1 });
   const img = await prepImage(file);
   const dataUrl = await blobToDataUrl(img);
@@ -41,22 +46,24 @@ export async function ocrImage(file: Blob, onProgress?: OcrProgress): Promise<st
   const res = await fetch("/api/ocr", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ image: dataUrl }),
+    body: JSON.stringify({ image: dataUrl, products: productNames }),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data?.error || `OCR failed (${res.status})`);
   onProgress?.({ status: "done", progress: 1 });
-  return data.text || "";
+  return (data.items as ExtractedItem[]) || [];
 }
 
-/** OCR several images and concatenate their text. */
-export async function ocrImages(
+/** Extract from several images and concatenate the line items. */
+export async function extractImages(
   files: Blob[],
+  productNames: string[],
   onProgress?: (fileIndex: number, info: { status: string; progress: number }) => void
-): Promise<string> {
-  const parts: string[] = [];
+): Promise<ExtractedItem[]> {
+  const all: ExtractedItem[] = [];
   for (let i = 0; i < files.length; i++) {
-    parts.push(await ocrImage(files[i], (info) => onProgress?.(i, info)));
+    const items = await extractImage(files[i], productNames, (info) => onProgress?.(i, info));
+    all.push(...items);
   }
-  return parts.join("\n");
+  return all;
 }

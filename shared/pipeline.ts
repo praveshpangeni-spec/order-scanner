@@ -1,6 +1,7 @@
-import { Product, DraftItem } from "./types";
+import { Product, DraftItem, ExtractedItem } from "./types";
 import { parseOrderText } from "./parser";
 import { matchProducts, confidenceOf } from "./matcher";
+import { normalize } from "./normalize";
 
 let counter = 0;
 function uid(): string {
@@ -29,6 +30,51 @@ export function buildDraft(text: string, products: Product[]): DraftItem[] {
       candidates,
       confidence,
       quantity: line.quantity,
+      price,
+    } as DraftItem;
+  });
+}
+
+/**
+ * Turn structured items from the vision model into confirmable draft items.
+ * Uses the model's exact catalog name when it flagged one, otherwise falls back
+ * to fuzzy-matching so the user still gets suggestions to pick from.
+ */
+export function draftFromItems(
+  items: ExtractedItem[],
+  products: Product[]
+): DraftItem[] {
+  const byName = new Map<string, Product>();
+  for (const p of products) byName.set(normalize(p.name), p);
+
+  return items.map((item) => {
+    let product: Product | null = null;
+    let candidates = matchProducts(item.product || item.raw, products);
+
+    if (item.in_catalog) {
+      product = byName.get(normalize(item.product)) || null;
+    }
+    if (!product) {
+      const top = candidates[0];
+      if (top && top.score >= 0.72) product = top.product;
+    }
+
+    const confidence = product
+      ? item.in_catalog
+        ? "high"
+        : confidenceOf(candidates[0]?.score ?? 0)
+      : candidates.length
+      ? confidenceOf(candidates[0].score)
+      : "none";
+
+    const price = product?.price != null ? product.price : null;
+    return {
+      id: uid(),
+      raw: item.quantity_raw ? `${item.raw}` : item.raw,
+      product,
+      candidates,
+      confidence,
+      quantity: item.quantity,
       price,
     } as DraftItem;
   });

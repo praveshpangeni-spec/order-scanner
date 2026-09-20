@@ -2,8 +2,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { Product, DraftItem, MatchConfidence } from "@order/shared";
-import { buildDraft } from "@order/shared";
-import { ocrImages } from "@/lib/ocr";
+import { draftFromItems } from "@order/shared";
+import { extractImages } from "@/lib/ocr";
 import {
   getProducts,
   createOrder,
@@ -75,10 +75,12 @@ export default function ScanFlow() {
     setPhase("ocr");
     setProgress({ i: 0, pct: 0 });
     try {
-      const text = await ocrImages(files, (i, info) =>
-        setProgress({ i, pct: Math.round(info.progress * 100) })
+      const items = await extractImages(
+        files,
+        products.map((p) => p.name),
+        (i, info) => setProgress({ i, pct: Math.round(info.progress * 100) })
       );
-      const draft = buildDraft(text, products);
+      const draft = draftFromItems(items, products);
       setRows(
         draft.map((d) => ({
           ...d,

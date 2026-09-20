@@ -65,6 +65,21 @@ export interface OrderItem {
   raw_text?: string | null;
 }
 
+/** A line item extracted from an order image by the vision model. */
+export interface ExtractedItem {
+  /** The order line exactly as written. */
+  raw: string;
+  /** Catalog product name (exact) if matched, else the product text as written. */
+  product: string;
+  /** True only when `product` is an exact catalog name. */
+  in_catalog: boolean;
+  /** Best-guess ordered quantity as a number. */
+  quantity: number | null;
+  /** Original quantity text, e.g. "170+22" or "1x3 (60ph)". */
+  quantity_raw?: string;
+  unit?: string;
+}
+
 /** Maps arbitrary spreadsheet columns to product fields when importing a list. */
 export interface ProductColumnMap {
   name: string;

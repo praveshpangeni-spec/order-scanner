@@ -1,26 +1,61 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
-export const maxDuration = 30;
+export const maxDuration = 45;
 
 /**
- * Server-side OCR via the Gemini API (Google AI Studio) — free tier, no
- * billing/credit card required, and strong at reading handwriting. The API key
- * stays on the server. Both web (same-origin) and mobile (cross-origin) POST here.
+ * Structured order extraction via the Gemini API (Google AI Studio) — free tier,
+ * no billing card, and strong at reading handwriting AND printed order forms.
+ * The key stays server-side. Returns { items: ExtractedItem[] }.
  *
- * Set GEMINI_API_KEY in the environment. Get a free key at
- * https://aistudio.google.com/apikey
+ * Get a free key: https://aistudio.google.com/apikey  ->  set GEMINI_API_KEY.
  */
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+const MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
 
-const PROMPT = `You are transcribing a handwritten wholesale product order (pharmaceutical / FMCG).
-Output one line per order item, in the form: <product name as written> <quantity>
-Rules:
-- Keep the product name and any pack size exactly as written (e.g. "candid cream 20gm").
-- Put the quantity (a number) at the END of each line.
-- One item per line. Ignore headers, dates, customer names, totals, and page numbers.
-- Output ONLY the order lines. No commentary, no bullet points, no extra text.`;
+function buildPrompt(catalog: string[]): string {
+  const list = catalog.length ? catalog.join("\n") : "(none provided)";
+  return `You extract a wholesale product order from an image. It may be a handwritten note, a numbered list, or a PRINTED order form / order book with a quantity column. Read the whole image carefully.
+
+Return one object per ordered line. For each line:
+- "raw": the line exactly as written (product + quantity).
+- "product": if the item clearly matches one of the CATALOG names below, output that EXACT catalog name (copy it verbatim). Otherwise output the product name as written on the order.
+- "in_catalog": true ONLY when "product" is an exact catalog name.
+- "quantity": the ordered quantity as an integer, using these rules:
+    • "60 ph", "10 Pcs", "160 tb", "5 box" -> the number (60, 10, 160, 5).
+    • "170+22" or "2880+720" (base + free-scheme) -> the FIRST/base number (170, 2880).
+    • "1x3 (60ph)" or any explicit piece count in ph/pcs -> that piece count (60).
+    • If no quantity is written for a row, SKIP that row entirely.
+- "quantity_raw": the original quantity text exactly as written (e.g. "170+22", "1x3 (60ph)").
+- "unit": one of ph, pcs, tb, box, strip if present, else "".
+
+Only include real product order lines that have a quantity. Ignore titles, party/customer names, dates, addresses, phone numbers, stamps, signatures, column headers, and blank form rows.
+
+CATALOG (official product names):
+${list}`;
+}
+
+const RESPONSE_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    items: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          raw: { type: "STRING" },
+          product: { type: "STRING" },
+          in_catalog: { type: "BOOLEAN" },
+          quantity: { type: "NUMBER" },
+          quantity_raw: { type: "STRING" },
+          unit: { type: "STRING" },
+        },
+        required: ["raw", "product", "in_catalog", "quantity"],
+      },
+    },
+  },
+  required: ["items"],
+};
 
 export async function POST(req: NextRequest) {
   const key = process.env.GEMINI_API_KEY;
@@ -32,8 +67,11 @@ export async function POST(req: NextRequest) {
   }
 
   let image: string | undefined;
+  let products: string[] = [];
   try {
-    ({ image } = await req.json());
+    const body = await req.json();
+    image = body.image;
+    if (Array.isArray(body.products)) products = body.products.filter((x: any) => typeof x === "string");
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400, headers: cors() });
   }
@@ -56,12 +94,16 @@ export async function POST(req: NextRequest) {
           contents: [
             {
               parts: [
-                { text: PROMPT },
+                { text: buildPrompt(products) },
                 { inline_data: { mime_type: mimeType, data: content } },
               ],
             },
           ],
-          generationConfig: { temperature: 0 },
+          generationConfig: {
+            temperature: 0,
+            responseMimeType: "application/json",
+            responseSchema: RESPONSE_SCHEMA,
+          },
         }),
       }
     );
@@ -74,13 +116,30 @@ export async function POST(req: NextRequest) {
     }
     const text: string =
       data?.candidates?.[0]?.content?.parts?.map((p: any) => p.text || "").join("") || "";
-    return NextResponse.json({ text }, { headers: cors() });
+    const items = parseItems(text);
+    return NextResponse.json({ items, raw: text }, { headers: cors() });
   } catch (e: any) {
     return NextResponse.json(
       { error: e?.message || "OCR request failed." },
       { status: 502, headers: cors() }
     );
   }
+}
+
+function parseItems(text: string): any[] {
+  if (!text) return [];
+  let t = text.trim();
+  // Strip code fences if the model wrapped the JSON.
+  const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fence) t = fence[1].trim();
+  try {
+    const obj = JSON.parse(t);
+    if (Array.isArray(obj)) return obj;
+    if (Array.isArray(obj?.items)) return obj.items;
+  } catch {
+    /* fall through */
+  }
+  return [];
 }
 
 export async function OPTIONS() {

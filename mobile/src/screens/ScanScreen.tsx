@@ -13,8 +13,8 @@ import {
   Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import type { Product, DraftItem, MatchConfidence } from "@order/shared";
-import { buildDraft } from "@order/shared";
+import type { Product, DraftItem, MatchConfidence, ExtractedItem } from "@order/shared";
+import { draftFromItems } from "@order/shared";
 import { OcrEngine, OcrEngineHandle } from "../ocr";
 import { getProducts, createOrder, LOCATIONS, isSupabaseConfigured } from "../db";
 import { colors, confidenceStyle, money } from "../theme";
@@ -86,14 +86,15 @@ export default function ScanScreen() {
     setPhase("ocr");
     setProgress(0);
     try {
-      const parts: string[] = [];
+      const names = products.map((p) => p.name);
+      const all: ExtractedItem[] = [];
       for (let i = 0; i < images.length; i++) {
-        const text = await ocrRef.current.recognize(images[i], (p) =>
+        const items = await ocrRef.current.recognize(images[i], names, (p) =>
           setProgress(Math.round(((i + p) / images.length) * 100))
         );
-        parts.push(text);
+        all.push(...items);
       }
-      const draft = buildDraft(parts.join("\n"), products);
+      const draft = draftFromItems(all, products);
       setRows(
         draft.map((d) => ({
           ...d,
