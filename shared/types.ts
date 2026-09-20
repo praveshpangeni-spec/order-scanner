@@ -47,12 +47,20 @@ export interface DraftItem {
 export interface Order {
   id: string;
   created_at: string;
+  /** The month period this order belongs to (e.g. "Sep 2026"). */
+  month?: string | null;
   reference?: string | null;
   customer?: string | null;
   location?: string | null;
   note?: string | null;
   image_count: number;
   total: number;
+}
+
+export interface Month {
+  id: string;
+  name: string;
+  created_at: string;
 }
 
 export interface OrderItem {

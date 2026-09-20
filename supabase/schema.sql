@@ -14,9 +14,16 @@ create table if not exists products (
   created_at timestamptz default now()
 );
 
+create table if not exists months (
+  id         text primary key,
+  name       text not null,
+  created_at timestamptz default now()
+);
+
 create table if not exists orders (
   id          text primary key,
   created_at  timestamptz default now(),
+  month       text,
   reference   text,
   customer    text,
   location    text,
@@ -47,9 +54,13 @@ create index if not exists orders_created_at_idx on orders(created_at desc);
 alter table products    enable row level security;
 alter table orders      enable row level security;
 alter table order_items enable row level security;
+alter table months      enable row level security;
 
 do $$
 begin
+  if not exists (select 1 from pg_policies where tablename='months' and policyname='anon_all_months') then
+    create policy anon_all_months on months for all using (true) with check (true);
+  end if;
   if not exists (select 1 from pg_policies where tablename='products' and policyname='anon_all_products') then
     create policy anon_all_products on products for all using (true) with check (true);
   end if;

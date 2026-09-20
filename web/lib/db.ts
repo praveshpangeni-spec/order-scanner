@@ -1,5 +1,5 @@
 "use client";
-import type { Product, Order, OrderItem } from "@order/shared";
+import type { Product, Order, OrderItem, Month } from "@order/shared";
 import { supabase, isSupabaseConfigured } from "./supabase";
 import seed from "./products.seed.json";
 import partiesData from "./parties.json";
@@ -11,6 +11,8 @@ const LS = {
   products: "order_ocr_products",
   orders: "order_ocr_orders",
   items: "order_ocr_items",
+  months: "order_ocr_months",
+  activeMonth: "order_ocr_active_month",
 };
 
 export const LOCATIONS = ["Narayanghat", "Butwal", "Pokhara", "Birganj"];
@@ -52,6 +54,37 @@ function seededProducts(): Product[] {
 }
 
 export { isSupabaseConfigured };
+
+// ---------- Months ----------
+export async function listMonths(): Promise<Month[]> {
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("months")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return data as Month[];
+  }
+  return read<Month[]>(LS.months, []);
+}
+
+export async function createMonth(name: string): Promise<Month> {
+  const m: Month = { id: uuid(), name: name.trim(), created_at: new Date().toISOString() };
+  if (supabase) {
+    const { error } = await supabase.from("months").insert(m);
+    if (error) throw error;
+  } else {
+    write(LS.months, [m, ...read<Month[]>(LS.months, [])]);
+  }
+  return m;
+}
+
+export function getActiveMonth(): string | null {
+  return read<string | null>(LS.activeMonth, null);
+}
+export function setActiveMonth(name: string | null): void {
+  write(LS.activeMonth, name);
+}
 
 // ---------- Products ----------
 export async function getProducts(): Promise<Product[]> {
@@ -113,6 +146,7 @@ export interface NewOrderInput {
   reference?: string | null;
   customer?: string | null;
   location?: string | null;
+  month?: string | null;
   note?: string | null;
   image_count: number;
   items: Array<Omit<OrderItem, "id" | "order_id">>;
@@ -125,6 +159,7 @@ export async function createOrder(input: NewOrderInput): Promise<Order> {
   const order: Order = {
     id: uuid(),
     created_at: new Date().toISOString(),
+    month: input.month ?? null,
     reference: input.reference ?? null,
     customer: input.customer ?? null,
     location: input.location ?? null,
