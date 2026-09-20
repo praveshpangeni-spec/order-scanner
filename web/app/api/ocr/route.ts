@@ -11,7 +11,13 @@ export const maxDuration = 60;
  * Get a free key: https://aistudio.google.com/apikey  ->  set GEMINI_API_KEY.
  */
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+// Each model has its OWN free-tier quota, so we try several in order: if one is
+// rate-limited (429) or unavailable (404) we fall straight to the next.
+const MODELS = (process.env.GEMINI_MODELS ||
+  "gemini-2.5-flash,gemini-3.6-flash,gemini-flash-latest,gemini-2.5-flash-lite")
+  .split(",")
+  .map((m) => m.trim())
+  .filter(Boolean);
 
 const DEPOTS = ["Narayanghat", "Butwal", "Pokhara", "Birganj"];
 
@@ -99,7 +105,6 @@ export async function POST(req: NextRequest) {
   const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
   const content = commaIdx >= 0 ? image.slice(commaIdx + 1) : image;
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${key}`;
   const reqBody = JSON.stringify({
     contents: [
       {
@@ -116,42 +121,52 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  // The free tier sometimes returns 429/503 "overloaded" — retry with
-  // exponential backoff so real scans ride through transient spikes.
-  const MAX_TRIES = 6;
   let lastErr = "OCR request failed.";
-  for (let attempt = 0; attempt < MAX_TRIES; attempt++) {
-    try {
-      const resp = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: reqBody,
-      });
-      const data = await resp.json().catch(() => ({}));
-      if (resp.ok) {
-        const text: string =
-          data?.candidates?.[0]?.content?.parts?.map((p: any) => p.text || "").join("") || "";
-        const parsed = parseResult(text);
-        return NextResponse.json({ ...parsed, raw: text }, { headers: cors() });
+  let quotaHit = false;
+
+  // Try each model in turn (separate free-tier quotas). Within a model, retry a
+  // couple of times only for transient overload (503) — but on a quota error
+  // (429) move straight to the next model instead of burning time.
+  for (const model of MODELS) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+    const OVERLOAD_TRIES = 3;
+    let advanceModel = false;
+    for (let attempt = 0; attempt < OVERLOAD_TRIES && !advanceModel; attempt++) {
+      try {
+        const resp = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: reqBody,
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (resp.ok) {
+          const text: string =
+            data?.candidates?.[0]?.content?.parts?.map((p: any) => p.text || "").join("") || "";
+          const parsed = parseResult(text);
+          return NextResponse.json({ ...parsed, raw: text }, { headers: cors() });
+        }
+        const msg: string = data?.error?.message || `Gemini error ${resp.status}`;
+        lastErr = msg;
+        if (resp.status === 429 || /quota|rate limit/i.test(msg)) {
+          quotaHit = true;
+          advanceModel = true; // this model is rate-limited — try the next one
+        } else if (resp.status === 404 || /not found|not supported/i.test(msg)) {
+          advanceModel = true; // model unavailable — try the next one
+        } else if (![500, 502, 503].includes(resp.status) && !/overload|unavailable|try again/i.test(msg)) {
+          return NextResponse.json({ error: msg }, { status: 502, headers: cors() });
+        }
+      } catch (e: any) {
+        lastErr = e?.message || lastErr;
       }
-      const msg: string = data?.error?.message || `Gemini error ${resp.status}`;
-      const retriable =
-        [429, 500, 502, 503].includes(resp.status) ||
-        /overload|high demand|try again|unavailable|rate/i.test(msg);
-      lastErr = msg;
-      if (!retriable) {
-        return NextResponse.json({ error: msg }, { status: 502, headers: cors() });
-      }
-    } catch (e: any) {
-      lastErr = e?.message || lastErr;
+      if (!advanceModel && attempt < OVERLOAD_TRIES - 1)
+        await sleep(Math.min(4000, 600 * 2 ** attempt) + Math.random() * 300);
     }
-    if (attempt < MAX_TRIES - 1)
-      await sleep(Math.min(6000, 700 * 2 ** attempt) + Math.random() * 400);
   }
-  return NextResponse.json(
-    { error: `The OCR model is busy right now. Please try again. (${lastErr})` },
-    { status: 503, headers: cors() }
-  );
+
+  const hint = quotaHit
+    ? "All OCR models are over their free-tier limit right now. Wait about a minute and try again, or enable Gemini API billing for higher limits."
+    : "The OCR service is busy. Please try again.";
+  return NextResponse.json({ error: `${hint} (${lastErr})` }, { status: 503, headers: cors() });
 }
 
 function sleep(ms: number): Promise<void> {
