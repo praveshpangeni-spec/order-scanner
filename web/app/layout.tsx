@@ -21,17 +21,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur">
-          <nav className="mx-auto flex max-w-4xl items-center gap-1 px-4 py-3">
-            <Link href="/" className="mr-auto text-lg font-bold text-brand">
-              📷 Order Scanner
+          <nav className="mx-auto flex max-w-4xl items-center gap-1 overflow-x-auto px-4 py-3">
+            <Link href="/" className="mr-auto shrink-0 text-base font-bold text-brand">
+              📷 Orders
             </Link>
-            <Link href="/" className="btn-ghost !px-3 !py-1.5">
+            <Link href="/" className="btn-ghost shrink-0 !px-3 !py-1.5">
               Scan
             </Link>
-            <Link href="/orders" className="btn-ghost !px-3 !py-1.5">
-              Orders
+            <Link href="/orders" className="btn-ghost shrink-0 !px-3 !py-1.5">
+              Book
             </Link>
-            <Link href="/products" className="btn-ghost !px-3 !py-1.5">
+            <Link href="/history" className="btn-ghost shrink-0 !px-3 !py-1.5">
+              History
+            </Link>
+            <Link href="/products" className="btn-ghost shrink-0 !px-3 !py-1.5">
               Products
             </Link>
           </nav>

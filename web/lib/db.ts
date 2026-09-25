@@ -218,6 +218,45 @@ export async function getAllItems(): Promise<OrderItem[]> {
   return read<OrderItem[]>(LS.items, []);
 }
 
+export interface OrderEdit {
+  month?: string | null;
+  location?: string | null;
+  customer?: string | null;
+  note?: string | null;
+  items: Array<Omit<OrderItem, "id" | "order_id">>;
+}
+
+/** Update an order's header fields and fully replace its line items. */
+export async function updateOrderWithItems(orderId: string, edit: OrderEdit): Promise<void> {
+  const total =
+    Math.round(edit.items.reduce((s, i) => s + (i.line_total || 0), 0) * 100) / 100;
+  const fields = {
+    month: edit.month ?? null,
+    location: edit.location ?? null,
+    customer: edit.customer ?? null,
+    note: edit.note ?? null,
+    total,
+  };
+  const newItems: OrderItem[] = edit.items.map((it) => ({ ...it, id: uuid(), order_id: orderId }));
+
+  if (supabase) {
+    const { error: uErr } = await supabase.from("orders").update(fields).eq("id", orderId);
+    if (uErr) throw uErr;
+    await supabase.from("order_items").delete().eq("order_id", orderId);
+    const { error: iErr } = await supabase.from("order_items").insert(newItems);
+    if (iErr) throw iErr;
+    return;
+  }
+  write(
+    LS.orders,
+    read<Order[]>(LS.orders, []).map((o) => (o.id === orderId ? { ...o, ...fields } : o))
+  );
+  write(LS.items, [
+    ...read<OrderItem[]>(LS.items, []).filter((i) => i.order_id !== orderId),
+    ...newItems,
+  ]);
+}
+
 export async function deleteOrder(orderId: string): Promise<void> {
   if (supabase) {
     await supabase.from("order_items").delete().eq("order_id", orderId);

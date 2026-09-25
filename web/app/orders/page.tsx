@@ -159,44 +159,56 @@ export default function OrdersPage() {
       ) : selectedLocs.length === 0 ? (
         <div className="card p-8 text-center text-sm text-slate-500">Select at least one depot.</div>
       ) : (
-        <div className="card overflow-auto">
-          <table className="min-w-full border-collapse text-sm">
-            <thead>
-              <tr className="bg-slate-50 text-left">
-                <th className="sticky left-0 z-10 bg-slate-50 px-3 py-2 font-semibold">Product</th>
-                <th className="px-3 py-2 text-right font-semibold">MP</th>
-                {parties.map((p) => (
-                  <th key={p} className="whitespace-nowrap px-3 py-2 text-right font-semibold">{p}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {ordered.map((prod) => (
-                <tr key={prod.id} className="border-t border-slate-100">
-                  <td className="sticky left-0 z-10 whitespace-nowrap bg-white px-3 py-1.5">{prod.name}</td>
-                  <td className="px-3 py-1.5 text-right text-slate-400">{(priceFor(prod, null) ?? 0).toFixed(2)}</td>
-                  {parties.map((p) => {
-                    const q = qty[p]?.[prod.id] ?? qty[p]?.[prod.name] ?? 0;
-                    return (
-                      <td key={p} className={`px-3 py-1.5 text-right tabular-nums ${q ? "font-medium" : "text-slate-300"}`}>
-                        {q || "·"}
-                      </td>
-                    );
-                  })}
+        <>
+          <p className="text-xs text-slate-400">Swipe the table sideways to see all parties →</p>
+          <div className="card overflow-x-auto">
+            <table className="border-collapse text-xs">
+              <thead>
+                <tr className="bg-slate-50 text-left align-bottom">
+                  <th className="sticky left-0 z-10 w-32 min-w-[8rem] max-w-[8rem] bg-slate-50 px-2 py-2 font-semibold">
+                    Product
+                  </th>
+                  {parties.map((p) => (
+                    <th
+                      key={p}
+                      className="min-w-[4.5rem] max-w-[5.5rem] whitespace-normal break-words px-2 py-2 text-right align-bottom font-semibold leading-tight"
+                    >
+                      {p}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-              <tr className="border-t-2 border-slate-300 bg-slate-50 font-semibold">
-                <td className="sticky left-0 z-10 bg-slate-50 px-3 py-2">TOTAL (value)</td>
-                <td className="px-3 py-2" />
-                {parties.map((p) => (
-                  <td key={p} className="px-3 py-2 text-right tabular-nums">
-                    {colTotals[p] ? colTotals[p].toLocaleString(undefined, { maximumFractionDigits: 0 }) : "·"}
-                  </td>
+              </thead>
+              <tbody>
+                {ordered.map((prod) => (
+                  <tr key={prod.id} className="border-t border-slate-100">
+                    <td
+                      className="sticky left-0 z-10 w-32 min-w-[8rem] max-w-[8rem] truncate bg-white px-2 py-1.5"
+                      title={`${prod.name} · MP ${(priceFor(prod, null) ?? 0).toFixed(2)}`}
+                    >
+                      {prod.name}
+                    </td>
+                    {parties.map((p) => {
+                      const q = qty[p]?.[prod.id] ?? qty[p]?.[prod.name] ?? 0;
+                      return (
+                        <td key={p} className={`px-2 py-1.5 text-right tabular-nums ${q ? "font-medium" : "text-slate-300"}`}>
+                          {q || "·"}
+                        </td>
+                      );
+                    })}
+                  </tr>
                 ))}
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                <tr className="border-t-2 border-slate-300 bg-slate-50 font-semibold">
+                  <td className="sticky left-0 z-10 w-32 min-w-[8rem] max-w-[8rem] bg-slate-50 px-2 py-2">TOTAL</td>
+                  {parties.map((p) => (
+                    <td key={p} className="px-2 py-2 text-right tabular-nums">
+                      {colTotals[p] ? colTotals[p].toLocaleString(undefined, { maximumFractionDigits: 0 }) : "·"}
+                    </td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );
