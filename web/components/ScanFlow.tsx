@@ -59,6 +59,7 @@ export default function ScanFlow() {
   const [party, setParty] = useState("");
 
   const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     getProducts().then(setProducts).catch((e) => setError(String(e)));
@@ -99,10 +100,10 @@ export default function ScanFlow() {
   }
 
   function onFiles(list: FileList | null) {
-    if (!list) return;
+    if (!list || list.length === 0) return;
     const arr = Array.from(list);
-    setFiles(arr);
-    setPreviews(arr.map((f) => URL.createObjectURL(f)));
+    setFiles((prev) => [...prev, ...arr]);
+    setPreviews((prev) => [...prev, ...arr.map((f) => URL.createObjectURL(f))]);
   }
 
   async function runScan() {
@@ -297,16 +298,27 @@ export default function ScanFlow() {
 
           <div className="card p-4">
             <h2 className="mb-3 text-sm font-semibold text-slate-700">Order images</h2>
-            <input ref={fileRef} type="file" accept="image/*" capture="environment" multiple className="hidden" onChange={(e) => onFiles(e.target.files)} />
+            <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => { onFiles(e.target.files); e.target.value = ""; }} />
+            <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => { onFiles(e.target.files); e.target.value = ""; }} />
             <div className="flex flex-wrap gap-3">
-              {previews.map((src, i) => (<img key={i} src={src} alt="" className="h-24 w-24 rounded-lg border border-slate-200 object-cover" />))}
-              <button onClick={() => fileRef.current?.click()} className="flex h-24 w-24 flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 text-xs text-slate-500 hover:border-brand hover:text-brand">
-                <span className="text-2xl">＋</span>Add photo
-              </button>
+              {previews.map((src, i) => (
+                <div key={i} className="relative">
+                  <img src={src} alt="" className="h-24 w-24 rounded-lg border border-slate-200 object-cover" />
+                  <button
+                    onClick={() => { setPreviews((p) => p.filter((_, j) => j !== i)); setFiles((f) => f.filter((_, j) => j !== i)); }}
+                    className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-slate-700 text-xs text-white"
+                    title="Remove"
+                  >✕</button>
+                </div>
+              ))}
             </div>
-            {phase === "input" && (
-              <button className="btn-primary mt-4" disabled={files.length === 0 || !month} onClick={runScan}>
-                Scan {files.length > 0 ? `${files.length} image${files.length > 1 ? "s" : ""}` : ""}
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button onClick={() => fileRef.current?.click()} className="btn-primary">⬆ Upload image</button>
+              <button onClick={() => cameraRef.current?.click()} className="btn-ghost">📷 Take photo</button>
+            </div>
+            {phase === "input" && files.length > 0 && (
+              <button className="btn-primary mt-4 w-full sm:w-auto" disabled={!month} onClick={runScan}>
+                Scan {files.length} image{files.length > 1 ? "s" : ""}
               </button>
             )}
           </div>
@@ -342,12 +354,13 @@ export default function ScanFlow() {
                           <span className="truncate">“{r.raw}”</span>
                         </div>
                       )}
-                      <div className="flex gap-2">
-                        <select className="input flex-1" value={r.product?.id ?? ""} onChange={(e) => chooseProduct(r.id, e.target.value)}>
-                          <option value="">— choose product —</option>
-                          {sortedProducts.map((p) => (<option key={p.id} value={p.id}>{p.name}</option>))}
-                        </select>
-                        <input type="number" min={0} className="input w-24" placeholder="Qty" value={r.quantity ?? ""} onChange={(e) => setRow(r.id, { quantity: e.target.value === "" ? null : Number(e.target.value) })} />
+                      <select className="input w-full" value={r.product?.id ?? ""} onChange={(e) => chooseProduct(r.id, e.target.value)}>
+                        <option value="">— choose product —</option>
+                        {sortedProducts.map((p) => (<option key={p.id} value={p.id}>{p.name}</option>))}
+                      </select>
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className="text-xs font-medium text-slate-500">Qty</span>
+                        <input type="number" min={0} className="input w-28" placeholder="Qty" value={r.quantity ?? ""} onChange={(e) => setRow(r.id, { quantity: e.target.value === "" ? null : Number(e.target.value) })} />
                       </div>
                     </div>
                     <button onClick={() => setRows((rs) => rs.filter((x) => x.id !== r.id))} className="mt-1 text-slate-300 hover:text-red-500" title="Remove">✕</button>

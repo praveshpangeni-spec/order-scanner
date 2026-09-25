@@ -250,11 +250,11 @@ export default function ScanScreen() {
               ))}
             </View>
             <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
-              <TouchableOpacity style={styles.btnGhost} onPress={() => addImage(true)}>
-                <Text style={styles.btnGhostText}>📷 Camera</Text>
+              <TouchableOpacity style={styles.btnPrimary} onPress={() => addImage(false)}>
+                <Text style={styles.btnPrimaryText}>⬆ Upload image</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.btnGhost} onPress={() => addImage(false)}>
-                <Text style={styles.btnGhostText}>🖼 Gallery</Text>
+              <TouchableOpacity style={styles.btnGhost} onPress={() => addImage(true)}>
+                <Text style={styles.btnGhostText}>📷 Take photo</Text>
               </TouchableOpacity>
             </View>
             {phase === "input" && images.length > 0 && (
