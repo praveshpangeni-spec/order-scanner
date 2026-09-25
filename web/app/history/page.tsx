@@ -231,20 +231,25 @@ export default function HistoryPage() {
 
                     <div className="mt-3 space-y-2">
                       {draft.lines.map((l) => (
-                        <div key={l.key} className="flex items-center gap-2">
-                          <select className="input flex-1" value={l.product_id ?? ""} onChange={(e) => setLine(l.key, { product_id: e.target.value || null })}>
+                        <div key={l.key} className="rounded-lg border border-slate-200 bg-white p-2">
+                          <select className="input w-full" value={l.product_id ?? ""} onChange={(e) => setLine(l.key, { product_id: e.target.value || null })}>
                             <option value="">— choose product —</option>
                             {sortedProducts.map((p) => (<option key={p.id} value={p.id}>{p.name}</option>))}
                           </select>
-                          <input
-                            type="number"
-                            min={0}
-                            className="input w-20"
-                            placeholder="Qty"
-                            value={l.quantity ?? ""}
-                            onChange={(e) => setLine(l.key, { quantity: e.target.value === "" ? null : Number(e.target.value) })}
-                          />
-                          <button className="text-slate-300 hover:text-red-500" onClick={() => removeLine(l.key)} title="Remove">✕</button>
+                          <div className="mt-2 flex items-center gap-2">
+                            <span className="text-xs font-medium text-slate-500">Qty</span>
+                            <input
+                              type="number"
+                              min={0}
+                              className="input w-24"
+                              placeholder="Qty"
+                              value={l.quantity ?? ""}
+                              onChange={(e) => setLine(l.key, { quantity: e.target.value === "" ? null : Number(e.target.value) })}
+                            />
+                            <button className="ml-auto text-xs text-slate-400 hover:text-red-500" onClick={() => removeLine(l.key)}>
+                              ✕ Remove
+                            </button>
+                          </div>
                         </div>
                       ))}
                       <button className="text-xs font-medium text-brand" onClick={addLine}>＋ Add line</button>
