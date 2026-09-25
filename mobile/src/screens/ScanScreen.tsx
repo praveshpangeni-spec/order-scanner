@@ -11,6 +11,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
+  Dimensions,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import type { Product, DraftItem, MatchConfidence, ExtractedItem } from "@order/shared";
@@ -32,6 +33,7 @@ export default function ScanScreen() {
   const [rows, setRows] = useState<Row[]>([]);
   const [progress, setProgress] = useState(0);
   const [savedInfo, setSavedInfo] = useState({ count: 0, total: 0 });
+  const [zoomImg, setZoomImg] = useState<string | null>(null);
 
   const [location, setLocation] = useState(LOCATIONS[0]);
   const [customer, setCustomer] = useState("");
@@ -181,6 +183,9 @@ export default function ScanScreen() {
         })),
       });
       setSavedInfo({ count: included.length, total });
+      // Order is saved — wipe the images from memory; only the data remains.
+      setImages([]);
+      setZoomImg(null);
       setPhase("saved");
     } catch (e) {
       Alert.alert("Could not save", String(e));
@@ -278,6 +283,20 @@ export default function ScanScreen() {
 
           {phase === "review" && (
             <View style={styles.card}>
+              {images.length > 0 && (
+                <View style={{ marginBottom: 12 }}>
+                  <Text style={{ color: colors.faint, fontSize: 12, marginBottom: 6 }}>
+                    Tap the image to zoom while you check the lines
+                  </Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={images.length > 1}>
+                    {images.map((src, i) => (
+                      <TouchableOpacity key={i} activeOpacity={0.9} onPress={() => setZoomImg(src)}>
+                        <Image source={{ uri: src }} style={styles.reviewImg} resizeMode="contain" />
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
               <View style={styles.rowBetween}>
                 <Text style={styles.cardTitle}>Review ({included.length} selected)</Text>
                 <TouchableOpacity onPress={addManualRow}>
@@ -365,6 +384,30 @@ export default function ScanScreen() {
         </ScrollView>
       )}
 
+      {/* Full-screen image zoom */}
+      <Modal visible={zoomImg != null} transparent animationType="fade" onRequestClose={() => setZoomImg(null)}>
+        <View style={styles.zoomBackdrop}>
+          <TouchableOpacity style={styles.zoomClose} onPress={() => setZoomImg(null)}>
+            <Text style={{ color: "#fff", fontSize: 22 }}>✕</Text>
+          </TouchableOpacity>
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ flexGrow: 1, alignItems: "center", justifyContent: "center" }}
+            maximumZoomScale={5}
+            minimumZoomScale={1}
+            centerContent
+          >
+            {zoomImg && (
+              <Image
+                source={{ uri: zoomImg }}
+                style={{ width: Dimensions.get("window").width, height: Dimensions.get("window").height * 0.85 }}
+                resizeMode="contain"
+              />
+            )}
+          </ScrollView>
+        </View>
+      </Modal>
+
       {/* Product picker modal */}
       <Modal visible={pickerRow != null} animationType="slide" onRequestClose={() => setPickerRow(null)}>
         <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: 50 }}>
@@ -417,6 +460,17 @@ const styles = StyleSheet.create({
   chipText: { color: colors.muted, fontSize: 13 },
   chipTextActive: { color: "#fff", fontWeight: "600" },
   thumb: { width: 72, height: 72, borderRadius: 8, borderWidth: 1, borderColor: colors.border },
+  reviewImg: {
+    width: Dimensions.get("window").width * 0.82,
+    height: 300,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: "#fff",
+    marginRight: 8,
+  },
+  zoomBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.92)", paddingTop: 40 },
+  zoomClose: { alignSelf: "flex-end", padding: 16 },
   btnPrimary: { backgroundColor: colors.brand, borderRadius: 10, paddingVertical: 12, alignItems: "center", marginTop: 12 },
   btnPrimaryText: { color: "#fff", fontWeight: "600" },
   btnGhost: { borderWidth: 1, borderColor: colors.border, borderRadius: 10, paddingVertical: 10, paddingHorizontal: 16, backgroundColor: "#fff" },
