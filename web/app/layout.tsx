@@ -1,10 +1,19 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import "./globals.css";
+import PWA from "@/components/PWA";
 
 export const metadata: Metadata = {
   title: "Order Scanner",
-  description: "Scan order images, match products, and export to Excel.",
+  description: "Scan order books and build monthly party-wise sales.",
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "Orders" },
+  icons: { icon: "/icon-192.png", apple: "/icon-180.png" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0f766e",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -28,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </nav>
         </header>
         <main className="mx-auto max-w-4xl px-4 py-6">{children}</main>
+        <PWA />
       </body>
     </html>
   );
