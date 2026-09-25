@@ -204,7 +204,7 @@ export async function POST(req: NextRequest) {
   // (429) move straight to the next model instead of burning time.
   for (const model of models) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
-    const OVERLOAD_TRIES = 3;
+    const OVERLOAD_TRIES = 2;
     let advanceModel = false;
     for (let attempt = 0; attempt < OVERLOAD_TRIES && !advanceModel; attempt++) {
       try {
@@ -236,7 +236,7 @@ export async function POST(req: NextRequest) {
         lastErr = e?.message || lastErr;
       }
       if (!advanceModel && attempt < OVERLOAD_TRIES - 1)
-        await sleep(Math.min(4000, 600 * 2 ** attempt) + Math.random() * 300);
+        await sleep(Math.min(2000, 500 * 2 ** attempt) + Math.random() * 250);
     }
   }
 
