@@ -14,7 +14,7 @@ import {
 } from "@/lib/db";
 import { exportMatrixXlsx } from "@/lib/xlsx";
 
-const SEED_HINT = "Create a month and scan orders to fill this in.";
+const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 
 export default function OrdersPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -22,7 +22,7 @@ export default function OrdersPage() {
   const [items, setItems] = useState<OrderItem[]>([]);
   const [months, setMonths] = useState<Month[]>([]);
   const [month, setMonth] = useState("");
-  const [location, setLocation] = useState(LOCATIONS[0]);
+  const [selectedLocs, setSelectedLocs] = useState<string[]>([...LOCATIONS]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,45 +48,53 @@ export default function OrdersPage() {
     })();
   }, []);
 
-  const parties = PARTIES[location] || [];
-  const orderedProducts = useMemo(() => products, [products]);
+  const allSelected = selectedLocs.length === LOCATIONS.length;
+  function toggleLoc(loc: string) {
+    setSelectedLocs((s) => (s.includes(loc) ? s.filter((x) => x !== loc) : [...s, loc]));
+  }
+  function toggleAll() {
+    setSelectedLocs(allSelected ? [] : [...LOCATIONS]);
+  }
 
-  // qty[party][productId] for the selected month + location
-  const { qty, colTotals } = useMemo(() => {
+  const ordered = useMemo(
+    () => [...products].sort((a, b) => a.name.localeCompare(b.name)),
+    [products]
+  );
+
+  // Parties = union across selected depots (merged by name). qty summed.
+  const { parties, qty, colTotals } = useMemo(() => {
     const ordersById = new Map(orders.map((o) => [o.id, o]));
+    const displayByNorm: Record<string, string> = {};
+    for (const loc of selectedLocs)
+      for (const p of PARTIES[loc] || []) if (!displayByNorm[norm(p)]) displayByNorm[norm(p)] = p;
+    const parties = Object.values(displayByNorm).sort((a, b) => a.localeCompare(b));
+
     const qty: Record<string, Record<string, number>> = {};
     for (const p of parties) qty[p] = {};
     for (const it of items) {
       const o = ordersById.get(it.order_id);
-      if (!o || o.month !== month || o.location !== location) continue;
-      const party = (o.customer || "").trim();
-      if (!qty[party]) continue;
+      if (!o || o.month !== month || !selectedLocs.includes(o.location || "")) continue;
+      const party = displayByNorm[norm(o.customer || "")];
+      if (!party) continue;
       const k = it.product_id || it.product_name;
       qty[party][k] = (qty[party][k] || 0) + (it.quantity || 0);
     }
     const colTotals: Record<string, number> = {};
     for (const p of parties) {
       let sum = 0;
-      for (const prod of orderedProducts) {
+      for (const prod of ordered) {
         const q = qty[p][prod.id] ?? qty[p][prod.name] ?? 0;
-        sum += q * (priceFor(prod, location) ?? 0);
+        sum += q * (priceFor(prod, null) ?? 0);
       }
       colTotals[p] = Math.round(sum * 100) / 100;
     }
-    return { qty, colTotals };
-  }, [orders, items, parties, orderedProducts, month, location]);
+    return { parties, qty, colTotals };
+  }, [orders, items, selectedLocs, ordered, month]);
 
   const monthOrders = orders.filter((o) => o.month === month);
 
   function doExport() {
-    exportMatrixXlsx(
-      month,
-      LOCATIONS,
-      PARTIES,
-      products,
-      orders.filter((o) => o.month === month),
-      items
-    );
+    exportMatrixXlsx(month, LOCATIONS, PARTIES, products, monthOrders, items);
   }
 
   return (
@@ -96,7 +104,9 @@ export default function OrdersPage() {
           <h1 className="text-xl font-bold">Order book</h1>
           <p className="text-sm text-slate-500">Party-wise sales · {monthOrders.length} scans this month</p>
         </div>
-        <button className="btn-primary" disabled={!month} onClick={doExport}>⬇ Export Excel</button>
+        <button className="btn-primary" disabled={!month} onClick={doExport}>
+          ⬇ Export Excel (all depots + combined)
+        </button>
       </div>
 
       {!isSupabaseConfigured && (
@@ -106,15 +116,37 @@ export default function OrdersPage() {
       )}
       {error && <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <select className="input max-w-[12rem]" value={month} onChange={(e) => setMonth(e.target.value)}>
           <option value="">— select month —</option>
           {months.map((m) => (<option key={m.id} value={m.name}>{m.name}</option>))}
         </select>
-        <select className="input max-w-[12rem]" value={location} onChange={(e) => setLocation(e.target.value)}>
-          {LOCATIONS.map((l) => (<option key={l}>{l}</option>))}
-        </select>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <button
+            onClick={toggleAll}
+            className={`rounded-full px-3 py-1 text-xs font-medium ${allSelected ? "bg-brand text-white" : "border border-slate-300 bg-white text-slate-600"}`}
+          >
+            All
+          </button>
+          {LOCATIONS.map((l) => {
+            const on = selectedLocs.includes(l);
+            return (
+              <button
+                key={l}
+                onClick={() => toggleLoc(l)}
+                className={`rounded-full px-3 py-1 text-xs font-medium ${on ? "bg-teal-100 text-teal-800" : "border border-slate-300 bg-white text-slate-500"}`}
+              >
+                {l}
+              </button>
+            );
+          })}
+        </div>
       </div>
+      {selectedLocs.length > 1 && (
+        <p className="text-xs text-slate-400">
+          Showing {allSelected ? "all depots" : selectedLocs.join(", ")} combined — a party in multiple depots is summed.
+        </p>
+      )}
 
       {loading ? (
         <p className="text-sm text-slate-500">Loading…</p>
@@ -122,8 +154,10 @@ export default function OrdersPage() {
         <div className="card p-8 text-center text-sm text-slate-500">
           {months.length === 0 ? (
             <>No months yet. <Link href="/" className="font-medium text-brand">Create one and scan →</Link></>
-          ) : SEED_HINT}
+          ) : "Create a month and scan orders to fill this in."}
         </div>
+      ) : selectedLocs.length === 0 ? (
+        <div className="card p-8 text-center text-sm text-slate-500">Select at least one depot.</div>
       ) : (
         <div className="card overflow-auto">
           <table className="min-w-full border-collapse text-sm">
@@ -137,10 +171,10 @@ export default function OrdersPage() {
               </tr>
             </thead>
             <tbody>
-              {orderedProducts.map((prod) => (
+              {ordered.map((prod) => (
                 <tr key={prod.id} className="border-t border-slate-100">
                   <td className="sticky left-0 z-10 whitespace-nowrap bg-white px-3 py-1.5">{prod.name}</td>
-                  <td className="px-3 py-1.5 text-right text-slate-400">{(priceFor(prod, location) ?? 0).toFixed(2)}</td>
+                  <td className="px-3 py-1.5 text-right text-slate-400">{(priceFor(prod, null) ?? 0).toFixed(2)}</td>
                   {parties.map((p) => {
                     const q = qty[p]?.[prod.id] ?? qty[p]?.[prod.name] ?? 0;
                     return (
