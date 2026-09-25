@@ -53,13 +53,43 @@ export async function GET() {
  * Get a free key: https://aistudio.google.com/apikey  ->  set GEMINI_API_KEY.
  */
 
-// Each model has its OWN free-tier quota, so we try several in order: if one is
-// rate-limited (429) or unavailable (404) we fall straight to the next.
+// Fallback list if model discovery fails. Each model has its own free-tier
+// quota, so we try several in order (429/404 → next model).
 const MODELS = (process.env.GEMINI_MODELS ||
-  "gemini-2.5-flash,gemini-3.6-flash,gemini-flash-latest,gemini-2.5-flash-lite")
+  "gemini-flash-latest,gemini-flash-lite-latest,gemini-2.5-flash")
   .split(",")
   .map((m) => m.trim())
   .filter(Boolean);
+
+// Model names churn, so discover what THIS key can actually use (ListModels
+// returns only accessible models — avoids "no longer available" 404s). Cached
+// across warm invocations.
+let modelCache: { at: number; models: string[] } | null = null;
+async function discoverModels(key: string): Promise<string[]> {
+  if (modelCache && Date.now() - modelCache.at < 3_600_000) return modelCache.models;
+  try {
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${key}&pageSize=200`
+    );
+    const d = await r.json();
+    const names: string[] = (d?.models || [])
+      .filter((m: any) => (m.supportedGenerationMethods || []).includes("generateContent"))
+      .map((m: any) => String(m.name || "").replace(/^models\//, ""))
+      .filter((n: string) => /flash/i.test(n) && !/(vision|thinking|image|audio|tts|embedding|live)/i.test(n));
+    const rank = (n: string) => {
+      let s = 0;
+      if (/lite/i.test(n)) s += 2; // prefer full flash (better handwriting) first
+      if (/preview|exp/i.test(n)) s += 5;
+      if (/latest/i.test(n)) s -= 1;
+      return s;
+    };
+    const ordered = names.sort((a, b) => rank(a) - rank(b));
+    if (ordered.length) modelCache = { at: Date.now(), models: ordered.slice(0, 6) };
+    return ordered.slice(0, 6);
+  } catch {
+    return [];
+  }
+}
 
 const DEPOTS = ["Narayanghat", "Butwal", "Pokhara", "Birganj"];
 
@@ -166,10 +196,13 @@ export async function POST(req: NextRequest) {
   let lastErr = "OCR request failed.";
   let quotaHit = false;
 
+  const discovered = await discoverModels(key);
+  const models = discovered.length ? discovered : MODELS;
+
   // Try each model in turn (separate free-tier quotas). Within a model, retry a
   // couple of times only for transient overload (503) — but on a quota error
   // (429) move straight to the next model instead of burning time.
-  for (const model of MODELS) {
+  for (const model of models) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
     const OVERLOAD_TRIES = 3;
     let advanceModel = false;
