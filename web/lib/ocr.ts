@@ -91,6 +91,48 @@ export async function extractImage(
   };
 }
 
+/**
+ * Batch: one draft order per image. groupSize=1 sends a request per image
+ * (reliable), groupSize>1 sends several images per request (saves free quota).
+ * Reports progress as images finish; returns a result per input image.
+ */
+export async function extractBatch(
+  files: Blob[],
+  productNames: string[],
+  groupSize: number,
+  onProgress?: (done: number, total: number) => void
+): Promise<{ results: ExtractResult[]; usage?: ScanUsage }> {
+  const prepared: string[] = [];
+  for (const f of files) prepared.push(await blobToDataUrl(await prepImage(f)));
+
+  const results: ExtractResult[] = [];
+  let usage: ScanUsage | undefined;
+  const g = Math.max(1, groupSize);
+  for (let i = 0; i < prepared.length; i += g) {
+    const chunk = prepared.slice(i, i + g);
+    const res = await fetch("/api/ocr-batch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ images: chunk, products: productNames }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const err: any = new Error(data?.error || `OCR failed (${res.status})`);
+      err.usage = data?.usage;
+      err.partial = results;
+      throw err;
+    }
+    const orders = (data.orders as any[]) || [];
+    for (let k = 0; k < chunk.length; k++) {
+      const o = orders[k] || {};
+      results.push({ header: o.header || {}, items: Array.isArray(o.items) ? o.items : [] });
+    }
+    if (data.usage) usage = data.usage as ScanUsage;
+    onProgress?.(Math.min(i + g, prepared.length), prepared.length);
+  }
+  return { results, usage };
+}
+
 /** Extract from several images; concatenates items, keeps the first header found. */
 export async function extractImages(
   files: Blob[],

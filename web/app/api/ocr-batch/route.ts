@@ -19,58 +19,61 @@ export const maxDuration = 60;
 const SCHEMA = {
   type: "OBJECT",
   properties: {
-    header: HEADER_SCHEMA,
-    items: { type: "ARRAY", items: ITEM_SCHEMA },
+    orders: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: { header: HEADER_SCHEMA, items: { type: "ARRAY", items: ITEM_SCHEMA } },
+        required: ["items"],
+      },
+    },
   },
-  required: ["items"],
+  required: ["orders"],
 };
 
-function prompt(catalog: string[]): string {
-  return `You extract a wholesale product order from an image (handwritten note, numbered list, or printed order form with a quantity column).
+function prompt(catalog: string[], n: number): string {
+  return `You are given ${n} images. EACH image is a SEPARATE wholesale order from a (usually different) party.
+Return "orders": an array with EXACTLY ${n} objects, one per image, in the SAME ORDER as the images. Do not merge images.
+For each order object:
 ${headerRules()}
-Return the lines under "items". ${lineRules()}
+Put its lines under "items". ${lineRules()}
 
 CATALOG (official product names):
 ${catalog.length ? catalog.join("\n") : "(none)"}`;
-}
-
-export async function GET() {
-  return NextResponse.json(await readUsage(), { headers: cors() });
 }
 
 export async function POST(req: NextRequest) {
   if (!hasKey()) {
     return NextResponse.json({ error: "OCR is not configured (GEMINI_API_KEY missing)." }, { status: 500, headers: cors() });
   }
-  let image: string | undefined;
+  let images: string[] = [];
   let products: string[] = [];
   try {
     const body = await req.json();
-    image = body.image;
+    if (Array.isArray(body.images)) images = body.images.filter((x: any) => typeof x === "string");
     if (Array.isArray(body.products)) products = body.products.filter((x: any) => typeof x === "string");
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400, headers: cors() });
   }
-  if (!image || typeof image !== "string") {
-    return NextResponse.json({ error: "No image provided." }, { status: 400, headers: cors() });
+  if (images.length === 0) {
+    return NextResponse.json({ error: "No images provided." }, { status: 400, headers: cors() });
   }
-  const m = image.match(/^data:([^;]+);base64,/);
-  const mimeType = m ? m[1] : "image/jpeg";
-  const idx = image.indexOf(",");
-  const data = idx >= 0 ? image.slice(idx + 1) : image;
+
+  const parts: any[] = [{ text: prompt(products, images.length) }];
+  for (const img of images) {
+    const m = img.match(/^data:([^;]+);base64,/);
+    const mimeType = m ? m[1] : "image/jpeg";
+    const idx = img.indexOf(",");
+    parts.push({ inline_data: { mime_type: mimeType, data: idx >= 0 ? img.slice(idx + 1) : img } });
+  }
 
   try {
-    const text = await generate(
-      [{ text: prompt(products) }, { inline_data: { mime_type: mimeType, data } }],
-      SCHEMA
-    );
+    const text = await generate(parts, SCHEMA);
     const obj = parseJson(text) || {};
-    await bumpUsage(1);
+    const orders = Array.isArray(obj.orders) ? obj.orders : [];
+    await bumpUsage(1); // one request regardless of image count
     const usage = await readUsage();
-    return NextResponse.json(
-      { header: obj.header || {}, items: Array.isArray(obj.items) ? obj.items : [], usage },
-      { headers: cors() }
-    );
+    return NextResponse.json({ orders, usage }, { headers: cors() });
   } catch (e: any) {
     const quota = e instanceof GeminiError && e.quotaHit;
     const usage = await readUsage();
