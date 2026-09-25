@@ -22,7 +22,7 @@ export default function OrdersPage() {
   const [items, setItems] = useState<OrderItem[]>([]);
   const [months, setMonths] = useState<Month[]>([]);
   const [month, setMonth] = useState("");
-  const [selectedLocs, setSelectedLocs] = useState<string[]>([...LOCATIONS]);
+  const [selectedLocs, setSelectedLocs] = useState<string[]>([LOCATIONS[0]]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

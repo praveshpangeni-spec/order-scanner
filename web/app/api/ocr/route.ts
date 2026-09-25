@@ -78,7 +78,7 @@ async function discoverModels(key: string): Promise<string[]> {
       .filter((n: string) => /flash/i.test(n) && !/(vision|thinking|image|audio|tts|embedding|live)/i.test(n));
     const rank = (n: string) => {
       let s = 0;
-      if (/lite/i.test(n)) s += 2; // prefer full flash (better handwriting) first
+      if (/lite/i.test(n)) s -= 2; // prefer flash-lite: faster + higher free limit
       if (/preview|exp/i.test(n)) s += 5;
       if (/latest/i.test(n)) s -= 1;
       return s;

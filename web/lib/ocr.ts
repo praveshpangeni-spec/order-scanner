@@ -27,22 +27,27 @@ export async function getUsage(): Promise<ScanUsage | null> {
 
 export type OcrProgress = (info: { status: string; progress: number }) => void;
 
-/** Downscale very large images to keep the upload small and OCR fast. */
+/**
+ * Downscale + compress hard so the upload is small (matters a lot on slow mobile
+ * data). ~1400px longest edge at JPEG 0.6 keeps text crisp for OCR while cutting
+ * payload several-fold versus the original photo.
+ */
 async function prepImage(file: Blob): Promise<Blob> {
   try {
     const bitmap = await createImageBitmap(file);
-    const MAX = 2200;
+    const MAX = 1400;
     const scale = Math.min(1, MAX / Math.max(bitmap.width, bitmap.height));
-    if (scale >= 1) return file;
     const canvas = document.createElement("canvas");
     canvas.width = Math.round(bitmap.width * scale);
     canvas.height = Math.round(bitmap.height * scale);
     const ctx = canvas.getContext("2d");
     if (!ctx) return file;
     ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    return await new Promise((res) =>
-      canvas.toBlob((b) => res(b || file), "image/jpeg", 0.9)
+    const out = await new Promise<Blob | null>((res) =>
+      canvas.toBlob((b) => res(b), "image/jpeg", 0.6)
     );
+    // Only use the re-encoded version if it's actually smaller.
+    return out && out.size < file.size ? out : out || file;
   } catch {
     return file;
   }
