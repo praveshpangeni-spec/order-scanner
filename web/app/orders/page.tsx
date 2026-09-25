@@ -1,13 +1,13 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import type { Product, Order, OrderItem, Month } from "@order/shared";
+import type { Product, Order, OrderItem } from "@order/shared";
 import { priceFor } from "@order/shared";
 import {
   getProducts,
   listOrders,
   getAllItems,
-  listMonths,
+  monthOptions,
+  upcomingMonths,
   LOCATIONS,
   PARTIES,
   isSupabaseConfigured,
@@ -20,8 +20,7 @@ export default function OrdersPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [items, setItems] = useState<OrderItem[]>([]);
-  const [months, setMonths] = useState<Month[]>([]);
-  const [month, setMonth] = useState("");
+  const [month, setMonth] = useState(upcomingMonths(1)[0]);
   const [selectedLocs, setSelectedLocs] = useState<string[]>([LOCATIONS[0]]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,17 +28,10 @@ export default function OrdersPage() {
   useEffect(() => {
     (async () => {
       try {
-        const [p, o, it, ms] = await Promise.all([
-          getProducts(),
-          listOrders(),
-          getAllItems(),
-          listMonths(),
-        ]);
+        const [p, o, it] = await Promise.all([getProducts(), listOrders(), getAllItems()]);
         setProducts(p);
         setOrders(o);
         setItems(it);
-        setMonths(ms);
-        if (ms.length) setMonth(ms[0].name);
       } catch (e: any) {
         setError(e?.message || String(e));
       } finally {
@@ -47,6 +39,8 @@ export default function OrdersPage() {
       }
     })();
   }, []);
+
+  const months = useMemo(() => monthOptions(orders), [orders]);
 
   const allSelected = selectedLocs.length === LOCATIONS.length;
   function toggleLoc(loc: string) {
@@ -118,8 +112,7 @@ export default function OrdersPage() {
 
       <div className="flex flex-wrap items-center gap-3">
         <select className="input max-w-[12rem]" value={month} onChange={(e) => setMonth(e.target.value)}>
-          <option value="">— select month —</option>
-          {months.map((m) => (<option key={m.id} value={m.name}>{m.name}</option>))}
+          {months.map((m) => (<option key={m} value={m}>{m}</option>))}
         </select>
         <div className="flex flex-wrap items-center gap-1.5">
           <button
@@ -150,12 +143,6 @@ export default function OrdersPage() {
 
       {loading ? (
         <p className="text-sm text-slate-500">Loading…</p>
-      ) : !month ? (
-        <div className="card p-8 text-center text-sm text-slate-500">
-          {months.length === 0 ? (
-            <>No months yet. <Link href="/" className="font-medium text-brand">Create one and scan →</Link></>
-          ) : "Create a month and scan orders to fill this in."}
-        </div>
       ) : selectedLocs.length === 0 ? (
         <div className="card p-8 text-center text-sm text-slate-500">Select at least one depot.</div>
       ) : (

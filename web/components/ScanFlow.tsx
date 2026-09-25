@@ -1,14 +1,13 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import type { Product, DraftItem, MatchConfidence, Month } from "@order/shared";
+import type { Product, DraftItem, MatchConfidence } from "@order/shared";
 import { draftFromItems, priceFor } from "@order/shared";
 import { extractImages, getUsage, type ScanUsage } from "@/lib/ocr";
 import {
   getProducts,
   createOrder,
-  listMonths,
-  createMonth,
+  upcomingMonths,
   getActiveMonth,
   setActiveMonth,
   LOCATIONS,
@@ -52,9 +51,8 @@ export default function ScanFlow() {
   const [error, setError] = useState<string | null>(null);
   const [usage, setUsage] = useState<ScanUsage | null>(null);
 
-  const [months, setMonths] = useState<Month[]>([]);
-  const [month, setMonth] = useState<string>("");
-  const [newMonth, setNewMonth] = useState("");
+  const months = useMemo(() => upcomingMonths(3), []);
+  const [month, setMonth] = useState<string>(months[0]);
   const [location, setLocation] = useState(LOCATIONS[0]);
   const [party, setParty] = useState("");
 
@@ -64,15 +62,9 @@ export default function ScanFlow() {
   useEffect(() => {
     getProducts().then(setProducts).catch((e) => setError(String(e)));
     getUsage().then(setUsage).catch(() => {});
-    listMonths()
-      .then((ms) => {
-        setMonths(ms);
-        const active = getActiveMonth();
-        if (active && ms.some((m) => m.name === active)) setMonth(active);
-        else if (ms.length) setMonth(ms[0].name);
-      })
-      .catch((e) => setError(String(e)));
-  }, []);
+    const active = getActiveMonth();
+    if (active && months.includes(active)) setMonth(active);
+  }, [months]);
 
   const productById = useMemo(() => {
     const m = new Map<string, Product>();
@@ -85,19 +77,6 @@ export default function ScanFlow() {
   );
   const partyOptions = PARTIES[location] || [];
 
-  async function addMonth() {
-    const name = newMonth.trim();
-    if (!name) return;
-    try {
-      await createMonth(name);
-      setMonths(await listMonths());
-      setMonth(name);
-      setActiveMonth(name);
-      setNewMonth("");
-    } catch (e: any) {
-      setError(e?.message || String(e));
-    }
-  }
 
   function onFiles(list: FileList | null) {
     if (!list || list.length === 0) return;
@@ -239,24 +218,18 @@ export default function ScanFlow() {
         </div>
       )}
 
-      {/* Month bar — always visible */}
-      <div className="card flex flex-wrap items-end gap-3 p-4">
-        <label className="text-sm">
-          <span className="mb-1 block text-slate-600">Month</span>
-          <select className="input min-w-[10rem]" value={month} onChange={(e) => { setMonth(e.target.value); setActiveMonth(e.target.value); }}>
-            <option value="">— select month —</option>
-            {months.map((m) => (
-              <option key={m.id} value={m.name}>{m.name}</option>
-            ))}
-          </select>
-        </label>
-        <div className="flex items-end gap-2">
-          <label className="text-sm">
-            <span className="mb-1 block text-slate-600">New month</span>
-            <input className="input" placeholder="e.g. Sep 2026" value={newMonth} onChange={(e) => setNewMonth(e.target.value)} />
-          </label>
-          <button className="btn-ghost" onClick={addMonth} disabled={!newMonth.trim()}>Create</button>
-        </div>
+      {/* Month bar — assign this scan to a month */}
+      <div className="card p-4">
+        <span className="mb-1 block text-sm text-slate-600">Assign scan to month</span>
+        <select
+          className="input min-w-[10rem]"
+          value={month}
+          onChange={(e) => { setMonth(e.target.value); setActiveMonth(e.target.value); }}
+        >
+          {months.map((m) => (
+            <option key={m} value={m}>{m}</option>
+          ))}
+        </select>
       </div>
 
       {phase === "saved" ? (
@@ -271,11 +244,6 @@ export default function ScanFlow() {
         </div>
       ) : (
         <>
-          {!month && (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-              Create or select a month above before scanning.
-            </div>
-          )}
 
           <div className="card p-4">
             <h2 className="mb-3 text-sm font-semibold text-slate-700">Party &amp; depot</h2>

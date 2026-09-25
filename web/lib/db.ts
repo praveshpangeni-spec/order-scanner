@@ -17,6 +17,31 @@ const LS = {
 
 export const LOCATIONS = ["Narayanghat", "Butwal", "Pokhara", "Birganj"];
 
+const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+/** Current month + the next (count-1), formatted like "Sep-2026". */
+export function upcomingMonths(count = 3): string[] {
+  const now = new Date();
+  const out: string[] = [];
+  for (let i = 0; i < count; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    out.push(`${MON[d.getMonth()]}-${d.getFullYear()}`);
+  }
+  return out;
+}
+/** Sortable key for a "MMM-YYYY" label (higher = later). */
+export function monthSortKey(label: string): number {
+  const m = /^([A-Za-z]{3})-(\d{4})$/.exec(label || "");
+  if (!m) return 0;
+  const mi = MON.indexOf(m[1]);
+  return Number(m[2]) * 100 + (mi < 0 ? 0 : mi);
+}
+/** Month options for browsing: the upcoming ones plus any that already have data. */
+export function monthOptions(orders: { month?: string | null }[]): string[] {
+  const set = new Set<string>(upcomingMonths());
+  for (const o of orders) if (o.month) set.add(o.month);
+  return Array.from(set).sort((a, b) => monthSortKey(b) - monthSortKey(a));
+}
+
 function uuid(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto)
     return crypto.randomUUID();

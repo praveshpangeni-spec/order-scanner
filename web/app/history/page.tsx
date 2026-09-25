@@ -1,13 +1,13 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import type { Product, Order, OrderItem, Month } from "@order/shared";
+import type { Product, Order, OrderItem } from "@order/shared";
 import { priceFor } from "@order/shared";
 import {
   getProducts,
   listOrders,
   getAllItems,
-  listMonths,
+  monthOptions,
   updateOrderWithItems,
   deleteOrder,
   LOCATIONS,
@@ -33,7 +33,6 @@ export default function HistoryPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [items, setItems] = useState<OrderItem[]>([]);
-  const [months, setMonths] = useState<Month[]>([]);
   const [monthFilter, setMonthFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,11 +44,10 @@ export default function HistoryPage() {
   async function load() {
     setLoading(true);
     try {
-      const [p, o, it, ms] = await Promise.all([getProducts(), listOrders(), getAllItems(), listMonths()]);
+      const [p, o, it] = await Promise.all([getProducts(), listOrders(), getAllItems()]);
       setProducts(p);
       setOrders(o);
       setItems(it);
-      setMonths(ms);
     } catch (e: any) {
       setError(e?.message || String(e));
     } finally {
@@ -66,6 +64,7 @@ export default function HistoryPage() {
     [products]
   );
   const itemsOf = (id: string) => items.filter((i) => i.order_id === id);
+  const months = useMemo(() => monthOptions(orders), [orders]);
 
   const shown = orders
     .filter((o) => (monthFilter ? o.month === monthFilter : true))
@@ -173,7 +172,7 @@ export default function HistoryPage() {
 
       <select className="input max-w-[14rem]" value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)}>
         <option value="">All months</option>
-        {months.map((m) => (<option key={m.id} value={m.name}>{m.name}</option>))}
+        {months.map((m) => (<option key={m} value={m}>{m}</option>))}
       </select>
 
       {loading ? (
@@ -212,7 +211,7 @@ export default function HistoryPage() {
                         <span className="mb-1 block text-slate-600">Month</span>
                         <select className="input" value={draft.month} onChange={(e) => patchDraft({ month: e.target.value })}>
                           <option value="">— month —</option>
-                          {months.map((m) => (<option key={m.id} value={m.name}>{m.name}</option>))}
+                          {months.map((m) => (<option key={m} value={m}>{m}</option>))}
                         </select>
                       </label>
                       <label className="text-xs">
