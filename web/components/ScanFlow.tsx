@@ -203,7 +203,7 @@ export default function ScanFlow() {
           }`}
         >
           <span>
-            Free scans today: <strong>{usage.used}/{usage.limit}</strong>
+≈ Free scans used today: <strong>{usage.used}/{usage.limit}</strong>
             {usage.remaining > 0 ? ` · ${usage.remaining} left` : " · limit reached"}
           </span>
           <span>

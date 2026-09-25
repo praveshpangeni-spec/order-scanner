@@ -218,7 +218,7 @@ export default function BatchPage() {
       )}
       {usage && (
         <div className={`rounded-lg border px-3 py-2 text-xs ${usage.remaining <= 0 ? "border-red-200 bg-red-50 text-red-700" : usage.remaining <= 5 ? "border-amber-200 bg-amber-50 text-amber-800" : "border-slate-200 bg-white text-slate-600"}`}>
-          Free scans today: <strong>{usage.used}/{usage.limit}</strong>
+≈ Free scans used today: <strong>{usage.used}/{usage.limit}</strong>
           {groupImages ? " · grouping ~4 images per scan saves your quota" : " · one scan used per image"}
         </div>
       )}
