@@ -40,6 +40,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </nav>
         </header>
         <main className="mx-auto max-w-4xl px-4 py-6">{children}</main>
+        <footer className="mx-auto max-w-4xl px-4 pb-8 pt-2 text-center text-xs text-slate-400">
+          Developed by Pravesh Pangeni
+        </footer>
         <PWA />
       </body>
     </html>
