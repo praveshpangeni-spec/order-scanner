@@ -16,11 +16,35 @@ export default function PWA() {
       setPrompt(e);
     };
     const onInstalled = () => setPrompt(null);
+
+    // After a new deploy, a page opened earlier can reference JS files that no
+    // longer exist (ChunkLoadError → blank screen). Reload once to pick up the
+    // new version; guarded so it can't loop.
+    const isChunkError = (x: any) =>
+      /ChunkLoadError|Loading chunk .* failed|Failed to fetch dynamically imported module/i.test(
+        String(x?.name || "") + " " + String(x?.message || x || "")
+      );
+    const recover = (x: any) => {
+      if (!isChunkError(x)) return;
+      try {
+        const last = Number(sessionStorage.getItem("chunk_reload_at") || 0);
+        if (Date.now() - last < 30_000) return;
+        sessionStorage.setItem("chunk_reload_at", String(Date.now()));
+      } catch {}
+      window.location.reload();
+    };
+    const onError = (e: ErrorEvent) => recover(e.error || e.message);
+    const onRejection = (e: PromiseRejectionEvent) => recover(e.reason);
+
     window.addEventListener("beforeinstallprompt", onPrompt);
     window.addEventListener("appinstalled", onInstalled);
+    window.addEventListener("error", onError);
+    window.addEventListener("unhandledrejection", onRejection);
     return () => {
       window.removeEventListener("beforeinstallprompt", onPrompt);
       window.removeEventListener("appinstalled", onInstalled);
+      window.removeEventListener("error", onError);
+      window.removeEventListener("unhandledrejection", onRejection);
     };
   }, []);
 
