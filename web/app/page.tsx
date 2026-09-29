@@ -1,5 +1,5 @@
-import ScanFlow from "@/components/ScanFlow";
+import ScanTabs from "@/components/ScanTabs";
 
 export default function Home() {
-  return <ScanFlow />;
+  return <ScanTabs />;
 }

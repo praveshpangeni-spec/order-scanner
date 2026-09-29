@@ -47,7 +47,7 @@ interface Card {
   include: boolean;
 }
 
-export default function BatchPage() {
+export default function BulkFlow() {
   const [products, setProducts] = useState<Product[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -202,10 +202,6 @@ export default function BatchPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Bulk scan</h1>
-        <Link href="/" className="text-sm text-brand">Single scan →</Link>
-      </div>
 
       {!isSupabaseConfigured && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">

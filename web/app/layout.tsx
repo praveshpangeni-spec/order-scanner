@@ -28,9 +28,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Link href="/" className="btn-ghost shrink-0 !px-3 !py-1.5">
               Scan
             </Link>
-            <Link href="/batch" className="btn-ghost shrink-0 !px-3 !py-1.5">
-              Bulk
-            </Link>
             <Link href="/orders" className="btn-ghost shrink-0 !px-3 !py-1.5">
               Book
             </Link>
