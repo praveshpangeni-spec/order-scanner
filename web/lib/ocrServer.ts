@@ -28,17 +28,25 @@ async function discoverModels(key: string): Promise<string[]> {
     const names: string[] = (d?.models || [])
       .filter((m: any) => (m.supportedGenerationMethods || []).includes("generateContent"))
       .map((m: any) => String(m.name || "").replace(/^models\//, ""))
-      .filter((n: string) => /flash/i.test(n) && !/(vision|thinking|image|audio|tts|embedding|live)/i.test(n));
+      .filter(
+        (n: string) =>
+          /^gemini/i.test(n) &&
+          !/(vision|thinking|image|audio|tts|embedding|live|robotics|computer-use|native)/i.test(n)
+      );
+    // Every model has its own free quota, so keep a long fallback chain:
+    // flash-lite → flash → pro, stable before preview.
     const rank = (n: string) => {
       let s = 0;
-      if (/lite/i.test(n)) s -= 2;
+      if (/flash-lite/i.test(n)) s -= 3;
+      else if (/flash/i.test(n)) s -= 2;
+      else if (/pro/i.test(n)) s += 2;
       if (/preview|exp/i.test(n)) s += 5;
       if (/latest/i.test(n)) s -= 1;
       return s;
     };
-    const ordered = names.sort((a, b) => rank(a) - rank(b));
-    if (ordered.length) modelCache = { at: Date.now(), models: ordered.slice(0, 6) };
-    return ordered.slice(0, 6);
+    const ordered = names.sort((a, b) => rank(a) - rank(b)).slice(0, 12);
+    if (ordered.length) modelCache = { at: Date.now(), models: ordered };
+    return ordered;
   } catch {
     return [];
   }

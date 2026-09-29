@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { Product } from "@order/shared";
 import { draftFromItems, priceFor } from "@order/shared";
-import { extractBatch, getUsage, type ScanUsage } from "@/lib/ocr";
+import { extractBatch } from "@/lib/ocr";
 import {
   getProducts,
   createOrder,
@@ -54,7 +54,6 @@ export default function BatchPage() {
   const [phase, setPhase] = useState<"input" | "scanning" | "review" | "saved">("input");
   const [cards, setCards] = useState<Card[]>([]);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
-  const [usage, setUsage] = useState<ScanUsage | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [savedCount, setSavedCount] = useState(0);
 
@@ -67,7 +66,6 @@ export default function BatchPage() {
 
   useEffect(() => {
     getProducts().then(setProducts).catch((e) => setError(String(e)));
-    getUsage().then(setUsage).catch(() => {});
     const a = getActiveMonth();
     if (a && months.includes(a)) setMonth(a);
   }, [months]);
@@ -109,17 +107,15 @@ export default function BatchPage() {
     setPhase("scanning");
     setProgress({ done: 0, total: files.length });
     try {
-      const { results, usage: u } = await extractBatch(
+      const { results } = await extractBatch(
         files,
         products.map((p) => p.name),
         groupImages ? 4 : 1,
         (done, total) => setProgress({ done, total })
       );
-      if (u) setUsage(u);
       setCards(buildCards(results));
       setPhase("review");
     } catch (e: any) {
-      if (e?.usage) setUsage(e.usage);
       if (Array.isArray(e?.partial) && e.partial.length) {
         setCards(buildCards(e.partial));
         setPhase("review");
@@ -214,12 +210,6 @@ export default function BatchPage() {
       {!isSupabaseConfigured && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
           Local mode — data is saved in this browser only.
-        </div>
-      )}
-      {usage && (
-        <div className={`rounded-lg border px-3 py-2 text-xs ${usage.remaining <= 0 ? "border-red-200 bg-red-50 text-red-700" : usage.remaining <= 5 ? "border-amber-200 bg-amber-50 text-amber-800" : "border-slate-200 bg-white text-slate-600"}`}>
-≈ Free scans used today: <strong>{usage.used}/{usage.limit}</strong>
-          {groupImages ? " · grouping ~4 images per scan saves your quota" : " · one scan used per image"}
         </div>
       )}
       {error && <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}

@@ -6,7 +6,6 @@ import {
   bumpUsage,
   cors,
   hasKey,
-  GeminiError,
   lineRules,
   headerRules,
   ITEM_SCHEMA,
@@ -72,14 +71,11 @@ export async function POST(req: NextRequest) {
       { headers: cors() }
     );
   } catch (e: any) {
-    const quota = e instanceof GeminiError && e.quotaHit;
     const usage = await readUsage();
-    const hint = quota
-      ? "Daily free-tier scan limit reached. It resets at the time shown, or enable Gemini API billing."
-      : "The OCR service is busy. Please try again.";
+    const hint = "Couldn't read the image right now. Please try again in a minute.";
     return NextResponse.json(
-      { error: `${hint} (${e?.message || "failed"})`, usage: quota ? { ...usage, remaining: 0 } : usage },
-      { status: quota ? 503 : 502, headers: cors() }
+      { error: hint, detail: e?.message || "failed", usage },
+      { status: 503, headers: cors() }
     );
   }
 }
