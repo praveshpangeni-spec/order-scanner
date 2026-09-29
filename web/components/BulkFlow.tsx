@@ -15,6 +15,9 @@ import {
   isSupabaseConfigured,
 } from "@/lib/db";
 
+/** Images sent together in one OCR request (saves free-tier quota). */
+const GROUP_SIZE = 4;
+
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 function matchParty(scanned: string, parties: string[]): string {
   const q = norm(scanned || "");
@@ -59,7 +62,6 @@ export default function BulkFlow() {
 
   const months = useMemo(() => upcomingMonths(3), []);
   const [month, setMonth] = useState(months[0]);
-  const [groupImages, setGroupImages] = useState(false);
 
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
@@ -110,7 +112,7 @@ export default function BulkFlow() {
       const { results } = await extractBatch(
         files,
         products.map((p) => p.name),
-        groupImages ? 4 : 1,
+        GROUP_SIZE,
         (done, total) => setProgress({ done, total })
       );
       setCards(buildCards(results));
@@ -285,10 +287,6 @@ export default function BulkFlow() {
               <select className="input w-auto" value={month} onChange={(e) => { setMonth(e.target.value); setActiveMonth(e.target.value); }}>
                 {months.map((m) => (<option key={m} value={m}>{m}</option>))}
               </select>
-            </label>
-            <label className="mt-3 flex items-center gap-2 text-sm text-slate-700">
-              <input type="checkbox" className="h-4 w-4 accent-teal-600" checked={groupImages} onChange={(e) => setGroupImages(e.target.checked)} />
-              Group images per request (uses fewer free scans, slightly less reliable)
             </label>
           </div>
 
